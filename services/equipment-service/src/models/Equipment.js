@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import {getNextSeqVal} from './Counter.js';
 const CONDITION_TYPES = ['new', 'good', 'fair', 'poor', 'damaged', 'retired'];
 const equipmentSchema = new mongoose.Schema({
   equipmentId: { type: Number, unique: true, required: true, index: true },
@@ -15,6 +16,13 @@ equipmentSchema.index({name:1 , category:1},
         collation:{locale: 'en' , strenght : 2}
     }
 );
+
+equipmentSchema.pre('validate',async function(){
+  if(this.equipmentId == null || this.equipmentId === 0)
+  {
+    this.equipmentId = await getNextSeqVal("equipmentId");
+  }
+});
 
 const EquipmentModel = mongoose.model('Equipment', equipmentSchema);
 
