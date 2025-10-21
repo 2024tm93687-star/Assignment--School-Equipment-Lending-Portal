@@ -1,15 +1,67 @@
-import mongoose from 'mogoose';
-import EquipmentModel from '../models/Equipment';
+import mongoose from 'mongoose';
+import EquipmentItem from '../models/Equipment.js';
+import logger from '../config/logger.js';
 
 const createEquipment = async(req, res)=>{
-
+    logger.debug("createEquipment initiated for :" + req.body.name);
+    const session = await mongoose.startSession();
+    try{
+        session.startTransaction();
+        const{name,category, condition, quantity, available} = req.body;
+        const newEquipment = new EquipmentItem({
+            name,category,condition,quantity,available
+        });
+        await newEquipment.save();
+        res.status(201).json(newEquipment);
+        logger.debug("Equipment  created for :" + req.body.name);
+    }catch(error){
+        session.abortTransaction();
+        logger.error("Error creating equipment :",error);
+    }finally{
+        session.endSession();
+    }
 };
 
 const patchEquipment = async(req, res)=>{
-
+    logger.debug("patchEquipment initiated for :" + req.params.id);
+     const session = await mongoose.startSession();
+    try{
+        session.startTransaction();
+        const{id} = req.params;
+        const updates = req.body;
+       
+        const updateEquipment = await EquipmentItem.findByIdAndUpdate(id,updates,{new:true});
+        if(!updateEquipment)
+        {
+            return res.status(404).json({error : 'Equipment `{id}` not found'});
+        }
+        res.status(200).json(updateEquipment);
+        logger.debug("Equipment  created for :" + req.body.name);
+    }catch(error){
+        session.abortTransaction();
+        logger.error("Error creating equipment :",error);
+    }finally{
+        session.endSession();
+    }
 };
 
 const deleteEquipment = async(req, res)=>{
-
+    logger.debug("deleteEquipment initiated for :" + req.params.id);
+     const session = await mongoose.startSession();
+    try{
+        session.startTransaction();
+        const{name,category, condition, quantity, available} = req.body;
+        const newEquipment = new EquipmentModel({
+            name,category,condition,quantity,available
+        });
+        await newEquipment.save();
+        res.status(201).json(newEquipment);
+        logger.debug("Equipment  created for :" + req.body.name);
+    }catch(error){
+        session.abortTransaction();
+        logger.error("Error creating equipment :",error);
+    }finally{
+        session.endSession();
+    }
 };
 

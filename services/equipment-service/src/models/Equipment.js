@@ -24,7 +24,7 @@ equipmentSchema.pre('validate',async function(){
   }
 });
 
-const EquipmentModel = mongoose.model('Equipment', equipmentSchema);
+const EquipmentItem = mongoose.model('Equipment', equipmentSchema);
 
-export default EquipmentModel;
+export default EquipmentItem;
 

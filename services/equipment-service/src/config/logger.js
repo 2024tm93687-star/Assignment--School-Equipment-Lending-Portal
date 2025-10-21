@@ -6,9 +6,15 @@ const logger = winston.createLogger({
         winston.format.json(),
         winston.format.timestamp
     ),
+    defaultMeta : { service: 'equipment-service'},
     transports: [
         new winston.transports.File({filename:'error.log',level:'error'}),
         new winston.transports.File({filename : 'app.log'})
     ]
 });
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple(),
+  }));
+}
 export default logger;
