@@ -17,6 +17,7 @@ const createEquipment = async(req, res)=>{
     }catch(error){
         session.abortTransaction();
         logger.error("Error creating equipment :",error);
+        res.status(500).json({error : 'Internal Server Error'})
     }finally{
         session.endSession();
     }
@@ -36,10 +37,11 @@ const patchEquipment = async(req, res)=>{
             return res.status(404).json({error : 'Equipment `{id}` not found'});
         }
         res.status(200).json(updateEquipment);
-        logger.debug("Equipment  created for :" + req.body.name);
+        logger.debug("Equipment  updated for :" + req.body.name);
     }catch(error){
         session.abortTransaction();
-        logger.error("Error creating equipment :",error);
+        logger.error("Error updating equipment :",error);
+        res.status(500).json({error : 'Internal Server Error'})
     }finally{
         session.endSession();
     }
@@ -49,17 +51,19 @@ const deleteEquipment = async(req, res)=>{
     logger.debug("deleteEquipment initiated for :" + req.params.id);
      const session = await mongoose.startSession();
     try{
-        session.startTransaction();
-        const{name,category, condition, quantity, available} = req.body;
-        const newEquipment = new EquipmentModel({
-            name,category,condition,quantity,available
-        });
-        await newEquipment.save();
-        res.status(201).json(newEquipment);
-        logger.debug("Equipment  created for :" + req.body.name);
+       session.startTransaction();
+        const{id} = req.params;       
+        const deleteEquipment = await EquipmentItem.findByIdAndDelete(id);
+        if(!deleteEquipment)
+        {
+            return res.status(404).json({error : 'Equipment `{id}` not found'});
+        }
+        res.status(204).send();
+        logger.debug("Equipment  deleted for :" + req.params.id);
     }catch(error){
         session.abortTransaction();
-        logger.error("Error creating equipment :",error);
+        logger.error("Error deleting equipment :",error);
+        res.status(500).json({error : 'Internal Server Error'})
     }finally{
         session.endSession();
     }
