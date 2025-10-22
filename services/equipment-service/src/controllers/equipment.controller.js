@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import EquipmentItem from '../models/Equipment.js';
-import logger from '../config/logger.js';
+import EquipmentItem from '../models/equipment.model.js';
+import logger from '../utils/logger.js';
 
 const createEquipment = async(req, res)=>{
     logger.debug("createEquipment initiated for :" + req.body.name);
@@ -12,10 +12,18 @@ const createEquipment = async(req, res)=>{
             name,category,condition,quantity,available
         });
         await newEquipment.save();
+          
         res.status(201).json(newEquipment);
         logger.debug("Equipment  created for :" + req.body.name);
     }catch(error){
         session.abortTransaction();
+        if (error.code === 11000) {
+            logger.error("Duplicate equipment found:", error.keyValue);
+            return res.status(409).json({
+                error: "Duplicate entry",
+                message: `Equipment with ${Object.keys(error.keyValue).join(', ')} already exists.`,
+            });
+        }
         logger.error("Error creating equipment :",error);
         res.status(500).json({error : 'Internal Server Error'})
     }finally{
@@ -68,4 +76,10 @@ const deleteEquipment = async(req, res)=>{
         session.endSession();
     }
 };
+
+export default {
+    createEquipment,
+    patchEquipment,
+    deleteEquipment
+}
 

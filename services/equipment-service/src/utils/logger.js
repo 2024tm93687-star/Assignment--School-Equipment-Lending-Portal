@@ -4,7 +4,7 @@ const logger = winston.createLogger({
     level : 'debug',
     format : winston.format.combine(
         winston.format.json(),
-        winston.format.timestamp
+        winston.format.timestamp()
     ),
     defaultMeta : { service: 'equipment-service'},
     transports: [
