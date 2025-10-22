@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
-import logger from './logger.js';
+import logger from '../utils/logger.js';
 const connectionMongoDb = async(url) => {
+    console.log("connecting to mongoDb" +url);
     mongoose.set('strictQuery',true);
     mongoose.set('debug',true);
     await mongoose.connect(url,
@@ -16,3 +17,4 @@ const connectionMongoDb = async(url) => {
         logger.error("Error connecting MongoDb:",error);
     })
 };
+export default connectionMongoDb;
