@@ -12,7 +12,7 @@ const equipmentServiceApp = async function createEquipmentServiceApp(){
         await connectionMongoDb(process.env.MONGODB_URL|| 'mongodb://localhost:27017/equipmentdb')
         expressApp.use(cors());
         expressApp.use(express.json());
-        expressApp.use('/api/equipment',equipmentRouter);
+        expressApp.use('/equipment',equipmentRouter);
         expressApp.get('/health',(req,res)=>res.json({status:"ok"}));
         logger.info("Equipment Service initialized");
     }catch(error){
