@@ -83,7 +83,7 @@ const LoginPage: React.FC = () => {
                 </Form.Group>
 
                 <div className="d-flex justify-content-end mb-3">
-                  <Button variant="link" className="p-0 text-light">
+                  <Button disabled variant="link" className="p-0 text-light">
                     Forgot Password?
                   </Button>
                 </div>
@@ -100,7 +100,7 @@ const LoginPage: React.FC = () => {
 
               <div className="text-center mt-3">
                 <span>Don’t have an account? </span>
-                <Button variant="link" className="p-0 text-info">
+                <Button disabled variant="link" className="p-0 text-info">
                   Sign Up
                 </Button>
               </div>

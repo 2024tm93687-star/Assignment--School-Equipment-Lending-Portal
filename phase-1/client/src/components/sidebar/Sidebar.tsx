@@ -17,20 +17,27 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems }) => {
   const location = useLocation();
 
   return (
-    <div className="bg-secondary text-light h-100 p-3 border-end">
+    <div className="bg-secondary text-light h-100 border-end">
       <ListGroup variant="flush">
-        {menuItems.map((item) => (
-          <ListGroup.Item
-            key={item.path}
-            action
-            onClick={() => navigate(item.path)}
-            active={location.pathname === item.path}
-            className="d-flex align-items-center text-light bg-secondary border-0"
-          >
-            {item.icon}
-            {item.label}
-          </ListGroup.Item>
-        ))}
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+
+          return (
+            <ListGroup.Item
+              key={item.path}
+              action
+              onClick={() => navigate(item.path)}
+              className={`d-flex align-items-center border-0 ${
+                isActive
+                  ? "bg-light text-dark fw-semibold"
+                  : "bg-secondary text-light"
+              }`}
+            >
+              <span className="me-2">{item.icon}</span>
+              {item.label}
+            </ListGroup.Item>
+          );
+        })}
       </ListGroup>
     </div>
   );

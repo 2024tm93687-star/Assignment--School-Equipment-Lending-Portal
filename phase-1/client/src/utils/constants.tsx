@@ -21,6 +21,19 @@ export const COLLABORATORS = [
 ];
 
 export const MENU_ITEMS = [
-    { label: "Dashboard", icon: <FaTachometerAlt className="me-2" />, path: "/dashboard" },
-    { label: "Requests", icon: <FaClipboardList className="me-2" />, path: "/requests" },
-  ];
+  {
+    label: "Dashboard",
+    icon: <FaTachometerAlt className="me-2" />,
+    path: "/dashboard",
+  },
+  {
+    label: "Equipment Listing",
+    icon: <FaClipboardList className="me-2" />,
+    path: "/equipments",
+  },
+  {
+    label: "Requests",
+    icon: <FaClipboardList className="me-2" />,
+    path: "/equipments",
+  },
+];

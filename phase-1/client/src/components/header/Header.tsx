@@ -7,10 +7,10 @@ import type { RootState, AppDispatch } from "../../store";
 import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
-  title: string;
+  brand: React.ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<HeaderProps> = ({ brand }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { username } = useSelector((state: RootState) => state.auth);
@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm py-3">
       <Container fluid>
         <Navbar.Brand className="fw-bold text-uppercase text-wrap">
-          {title}
+          {brand}
         </Navbar.Brand>
 
         <Dropdown align="end">
