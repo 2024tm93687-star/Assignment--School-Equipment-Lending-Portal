@@ -1,0 +1,26 @@
+﻿# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# VS Code
+.vscode/
+
+# Database
+data/
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
