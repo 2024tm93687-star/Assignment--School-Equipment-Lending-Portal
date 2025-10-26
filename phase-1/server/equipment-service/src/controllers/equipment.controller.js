@@ -2,6 +2,47 @@ import mongoose from 'mongoose';
 import EquipmentItem from '../models/equipment.model.js';
 import logger from '../utils/logger.js';
 
+const getEquipment = async(req,res) =>{
+    logger.debug("getEquipment initiated");
+    const session = await mongoose.startSession();
+    try{
+        session.startTransaction();
+        const { equipmentId, category, name, condition, available } = req.query;
+        const filter = {}
+
+        if(category){
+            filter.category = category;
+        }
+        if(name){
+            filter.name = name;
+        }
+        if(name){
+            filter.condition = condition;
+        }
+        if(name){
+            filter.equipmentId = equipmentId;
+        }
+        if(name){
+            filter.available = available;
+        }
+        const equipment = await EquipmentItem.find(filter);
+        if(equipment.length === 0)
+        {
+            res.status(200).json({
+                message: "No equipment found matching your query.",
+                data :equipment});
+        }else{
+            res.status(200).json(equipment);
+        }
+    }catch(error){
+        session.abortTransaction();
+        logger.error("Error updating equipment :",error);
+        res.status(500).json({error : 'Internal Server Error'})
+    }finally{
+        session.endSession();
+    }
+};
+
 const createEquipment = async(req, res)=>{
     logger.debug("createEquipment initiated for :" + req.body.name);
     const session = await mongoose.startSession();
@@ -78,6 +119,7 @@ const deleteEquipment = async(req, res)=>{
 };
 
 export default {
+    getEquipment,
     createEquipment,
     updateEquipment,
     deleteEquipment

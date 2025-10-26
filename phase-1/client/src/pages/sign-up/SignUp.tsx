@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 interface SignupData {
   username: string;
   password: string;
+  confirmPassword: string;
   fullName: string;
   email: string;
   role: "STUDENT" | "STAFF" | "ADMIN";
@@ -15,6 +16,7 @@ const Signup: React.FC = () => {
   const [formData, setFormData] = useState<SignupData>({
     username: "",
     password: "",
+    confirmPassword: "",
     fullName: "",
     email: "",
     role: "STUDENT",
@@ -26,6 +28,7 @@ const Signup: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // Redirect if already authenticated
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) navigate("/dashboard");
@@ -41,28 +44,31 @@ const Signup: React.FC = () => {
     setError("");
     setSuccess("");
 
-    if (
-      !formData.username ||
-      !formData.password ||
-      !formData.fullName ||
-      !formData.email ||
-      !formData.department
-    ) {
+    const { username, password, confirmPassword, fullName, email, department } = formData;
+
+    if (!username || !password || !confirmPassword || !fullName || !email || !department) {
       setError("Please fill in all required fields.");
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    if (!emailRegex.test(email)) {
       setError("Please enter a valid email address.");
       return;
     }
 
+    // TODO: Replace with API call
     console.log("Signup data:", formData);
     setSuccess("Account created successfully!");
     setFormData({
       username: "",
       password: "",
+      confirmPassword: "",
       fullName: "",
       email: "",
       role: "STUDENT",
@@ -71,7 +77,10 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <Container fluid className="min-vh-100 d-flex justify-content-center align-items-center bg-dark text-light">
+    <Container
+      fluid
+      className="min-vh-100 d-flex justify-content-center align-items-center bg-dark text-light"
+    >
       <Row className="w-100 justify-content-center py-4">
         <Col xs={10} sm={8} md={6} lg={5}>
           <Card bg="secondary" text="light" className="shadow-lg border-0 p-4">
@@ -120,17 +129,35 @@ const Signup: React.FC = () => {
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3" controlId="password">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder="Enter password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
+                <Row>
+                  <Col xs={12} md={6}>
+                    <Form.Group className="mb-3" controlId="password">
+                      <Form.Label>Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Enter password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col xs={12} md={6}>
+                    <Form.Group className="mb-3" controlId="confirmPassword">
+                      <Form.Label>Confirm Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Confirm password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
 
                 <Row className="mb-3">
                   <Col>
