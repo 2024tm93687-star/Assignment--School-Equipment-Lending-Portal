@@ -31,8 +31,8 @@ const createEquipment = async(req, res)=>{
     }
 };
 
-const patchEquipment = async(req, res)=>{
-    logger.debug("patchEquipment initiated for :" + req.params.id);
+const updateEquipment = async(req, res)=>{
+    logger.debug("updateEquipment initiated for :" + req.params.id);
      const session = await mongoose.startSession();
     try{
         session.startTransaction();
@@ -79,7 +79,7 @@ const deleteEquipment = async(req, res)=>{
 
 export default {
     createEquipment,
-    patchEquipment,
+    updateEquipment,
     deleteEquipment
 }
 
