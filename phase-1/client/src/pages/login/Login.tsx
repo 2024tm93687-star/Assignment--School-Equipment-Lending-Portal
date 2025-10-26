@@ -100,7 +100,7 @@ const LoginPage: React.FC = () => {
 
               <div className="text-center mt-3">
                 <span>Don’t have an account? </span>
-                <Button disabled variant="link" className="p-0 text-info">
+                <Button variant="link" className="p-0 text-info" onClick={() => navigate("/sign-up")}>
                   Sign Up
                 </Button>
               </div>
