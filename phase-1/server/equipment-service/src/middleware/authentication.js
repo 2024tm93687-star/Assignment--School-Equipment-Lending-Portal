@@ -54,7 +54,13 @@ const authenticate = async (req, res, next) => {
             });
         }
         else{
-            logger.log(`User ${userData.username} with role ${userData.role} authorized for ${method} ${req.originalUrl}`);
+            logger.info({
+                message: `User authorized`,
+                user: userData.username,
+                role: userData.role,
+                method: method,
+                path: req.originalUrl
+            });
         }
         return next(); 
        
