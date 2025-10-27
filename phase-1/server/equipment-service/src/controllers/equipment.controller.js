@@ -55,6 +55,7 @@ const createEquipment = async(req, res)=>{
         await newEquipment.save();
           
         res.status(201).json(newEquipment);
+        session.commitTransaction();
         logger.debug("Equipment  created for :" + req.body.name);
     }catch(error){
         session.abortTransaction();
@@ -86,6 +87,7 @@ const updateEquipment = async(req, res)=>{
             return res.status(404).json({error : 'Equipment `{id}` not found'});
         }
         res.status(200).json(updateEquipment);
+        session.commitTransaction();
         logger.debug("Equipment  updated for :" + req.body.name);
     }catch(error){
         session.abortTransaction();
@@ -108,6 +110,7 @@ const deleteEquipment = async(req, res)=>{
             return res.status(404).json({error : 'Equipment `{id}` not found'});
         }
         res.status(204).send();
+        session.commitTransaction();
         logger.debug("Equipment  deleted for :" + req.params.id);
     }catch(error){
         session.abortTransaction();
