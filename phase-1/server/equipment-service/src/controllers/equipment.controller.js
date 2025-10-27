@@ -84,7 +84,7 @@ const updateEquipment = async(req, res)=>{
         const updateEquipment = await EquipmentItem.findByIdAndUpdate(id,updates,{new:true});
         if(!updateEquipment)
         {
-            return res.status(404).json({error : 'Equipment `{id}` not found'});
+            return res.status(404).json({error: `Equipment ${id} not found`});
         }
         res.status(200).json(updateEquipment);
         session.commitTransaction();
@@ -107,7 +107,7 @@ const deleteEquipment = async(req, res)=>{
         const deleteEquipment = await EquipmentItem.findByIdAndDelete(id);
         if(!deleteEquipment)
         {
-            return res.status(404).json({error : 'Equipment `{id}` not found'});
+            return res.status(404).json({error: `Equipment ${id} not found`});
         }
         res.status(204).send();
         session.commitTransaction();
