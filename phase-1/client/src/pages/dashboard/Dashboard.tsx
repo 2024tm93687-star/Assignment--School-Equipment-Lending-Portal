@@ -5,8 +5,8 @@ import type { RootState } from "../../store";
 import { REQUESTS_MOCK } from "../../mock";
 
 const Dashboard: React.FC = () => {
-  const { username, role } = useSelector((state: RootState) => state.auth) as {
-    username: string;
+  const { fullName, role } = useSelector((state: RootState) => state.auth) as {
+    fullName: string;
     role: string;
   };
 
@@ -21,7 +21,7 @@ const Dashboard: React.FC = () => {
     <Container fluid className="p-4">
       <Row className="mb-4">
         <Col>
-          <h3>Welcome, {username}!</h3>
+          <h3>Welcome, {fullName}!</h3>
           <p>
             Role: <strong className="text-capitalize">{role}</strong>
           </p>

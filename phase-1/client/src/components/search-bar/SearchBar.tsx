@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Placeholder } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
 
 interface SearchBarProps {
