@@ -4,45 +4,63 @@ A Spring Boot application providing JWT-based user authentication with role-base
 
 ## Features
 
-* JWT Token Generation and Validation
-* BCrypt Password Encryption
-* Role-Based Access Control (STUDENT, STAFF, ADMIN)
-* H2 Embedded Database
-* RESTful API
+- JWT Token Generation and Validation
+- BCrypt Password Encryption
+- Role-Based Access Control (STUDENT, STAFF, ADMIN)
+- H2 Embedded Database
+- RESTful API
 
 ## Quick Start
 
-1. Build:
+### Option A: Docker (no local Java/Maven required)
+
+From the repo root:
+
+```
+docker compose up --build auth-service
+```
+
+This builds `phase-1/server/auth-service` and starts it on port 8080.
+
+Stop with Ctrl+C (or use `-d` and stop via `docker compose down`).
+
+### Option B: Local Maven/Java
+
+1. Build
+
    ```
    mvn clean install
    ```
 
-2. Run:
+2. Run
+
    ```
    mvn spring-boot:run
    ```
 
-3. Access:
+3. Access
    - API: http://localhost:8080/api/auth
    - H2 Console: http://localhost:8080/h2-console
 
 ## Pre-loaded Test Users
 
-| Username | Password | Role |
-|----------|----------|------|
-| admin | admin123 | ADMIN |
-| staff | staff123 | STAFF |
-| student | student123 | STUDENT |
+| Username | Password   | Role    |
+| -------- | ---------- | ------- |
+| admin    | admin123   | ADMIN   |
+| staff    | staff123   | STAFF   |
+| student  | student123 | STUDENT |
 
 ## API Endpoints
 
 ### Authentication
+
 - POST /api/auth/signup - Register new user
 - POST /api/auth/login - Login and get JWT token
 - GET /api/auth/me - Get current user details
 - GET /api/auth/validate - Validate JWT token
 
 ### User Management (Admin Only)
+
 - GET /api/auth/users - Get all users
 - PUT /api/auth/deactivate/{id} - Deactivate user
 - PUT /api/auth/reactivate/{id} - Reactivate user
@@ -60,6 +78,7 @@ A Spring Boot application providing JWT-based user authentication with role-base
 ## 📚 API Documentation
 
 ### Base URL
+
 ```
 http://localhost:8080/api/auth
 ```
@@ -67,11 +86,13 @@ http://localhost:8080/api/auth
 ### Endpoints
 
 #### 1. User Signup
+
 **POST** `/signup`
 
 Register a new user account.
 
 **Request Body:**
+
 ```json
 {
   "username": "johndoe",
@@ -84,6 +105,7 @@ Register a new user account.
 ```
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiJ9...",
@@ -99,11 +121,13 @@ Register a new user account.
 ```
 
 #### 2. User Login
+
 **POST** `/login`
 
 Authenticate user and get JWT token.
 
 **Request Body:**
+
 ```json
 {
   "username": "admin",
@@ -112,6 +136,7 @@ Authenticate user and get JWT token.
 ```
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiJ9...",
@@ -127,16 +152,19 @@ Authenticate user and get JWT token.
 ```
 
 #### 3. Validate Token
+
 **GET** `/validate`
 
 Validate JWT token and get user role.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "valid": true,
@@ -148,16 +176,19 @@ Authorization: Bearer <token>
 ```
 
 #### 4. Get Current User
+
 **GET** `/me`
 
 Get authenticated user's details.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "userId": 1,
@@ -173,16 +204,19 @@ Authorization: Bearer <token>
 ```
 
 #### 5. Check if Admin
+
 **GET** `/is-admin`
 
 Check if authenticated user is an admin.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "isAdmin": true
@@ -190,16 +224,19 @@ Authorization: Bearer <token>
 ```
 
 #### 6. Check if Staff or Admin
+
 **GET** `/is-staff-or-admin`
 
 Check if authenticated user is staff or admin.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "isStaffOrAdmin": true
@@ -207,16 +244,19 @@ Authorization: Bearer <token>
 ```
 
 #### 7. Change Password
+
 **POST** `/change-password`
 
 Change user's password.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Request Body:**
+
 ```json
 {
   "oldPassword": "admin123",
@@ -225,6 +265,7 @@ Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Password changed successfully"
@@ -232,16 +273,19 @@ Authorization: Bearer <token>
 ```
 
 #### 8. Get All Users (Admin Only)
+
 **GET** `/users`
 
 Get list of all users.
 
 **Headers:**
+
 ```
 Authorization: Bearer <admin-token>
 ```
 
 **Response:**
+
 ```json
 [
   {
@@ -266,16 +310,19 @@ Authorization: Bearer <admin-token>
 ```
 
 #### 9. Deactivate User (Admin Only)
+
 **PUT** `/deactivate/{userId}`
 
 Deactivate a user account.
 
 **Headers:**
+
 ```
 Authorization: Bearer <admin-token>
 ```
 
 **Response:**
+
 ```json
 {
   "message": "User deactivated successfully"
@@ -283,16 +330,19 @@ Authorization: Bearer <admin-token>
 ```
 
 #### 10. Reactivate User (Admin Only)
+
 **PUT** `/reactivate/{userId}`
 
 Reactivate a user account.
 
 **Headers:**
+
 ```
 Authorization: Bearer <admin-token>
 ```
 
 **Response:**
+
 ```json
 {
   "message": "User reactivated successfully"
@@ -304,6 +354,7 @@ Authorization: Bearer <admin-token>
 ### Using cURL
 
 #### 1. Signup a New User
+
 ```bash
 curl -X POST http://localhost:8080/api/auth/signup \
   -H "Content-Type: application/json" \
@@ -318,6 +369,7 @@ curl -X POST http://localhost:8080/api/auth/signup \
 ```
 
 #### 2. Login
+
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
@@ -330,12 +382,14 @@ curl -X POST http://localhost:8080/api/auth/login \
 Save the token from the response.
 
 #### 3. Get Current User
+
 ```bash
 curl -X GET http://localhost:8080/api/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 #### 4. Validate Token
+
 ```bash
 curl -X GET http://localhost:8080/api/auth/validate \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"

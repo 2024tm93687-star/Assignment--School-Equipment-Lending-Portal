@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button, Alert, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { signupThunk } from "../../features/auth/auth-thunks";
+import type { AppDispatch, RootState } from "../../store";
 
 interface SignupData {
   username: string;
@@ -27,6 +30,8 @@ const Signup: React.FC = () => {
   const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.auth);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -62,18 +67,22 @@ const Signup: React.FC = () => {
       return;
     }
 
-    // TODO: Replace with API call
-    console.log("Signup data:", formData);
-    setSuccess("Account created successfully!");
-    setFormData({
-      username: "",
-      password: "",
-      confirmPassword: "",
-      fullName: "",
-      email: "",
-      role: "STUDENT",
-      department: "",
-    });
+    dispatch(
+      signupThunk({
+        username: formData.username,
+        password: formData.password,
+        fullName: formData.fullName,
+        email: formData.email,
+        role: formData.role,
+        department: formData.department,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setSuccess("Account created successfully!");
+        navigate("/dashboard");
+      })
+      .catch((err: string) => setError(err || "Signup failed"));
   };
 
   return (
@@ -190,8 +199,8 @@ const Signup: React.FC = () => {
                   </Col>
                 </Row>
 
-                <Button variant="primary" type="submit" className="w-100 fw-semibold">
-                  Sign Up
+                <Button variant="primary" type="submit" className="w-100 fw-semibold" disabled={loading}>
+                  {loading ? "Creating account..." : "Sign Up"}
                 </Button>
               </Form>
 

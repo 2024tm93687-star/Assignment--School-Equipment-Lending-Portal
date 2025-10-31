@@ -69,7 +69,7 @@ const EquipmentList: React.FC = () => {
       <Row className="mb-3 align-items-center">
         <Col xs={12} md={6} className="d-flex align-items-center">
           <h3 className="me-3 mb-0">Equipment List</h3>
-          {userRole === "admin" && (
+          {userRole === "ADMIN" && (
             <Button variant="primary" size="sm" onClick={handleAdd}>
               + Add
             </Button>
