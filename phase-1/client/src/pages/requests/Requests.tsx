@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Container, Table, Button, Badge, Spinner, Row, Col } from "react-bootstrap";
+import {
+  Container,
+  Table,
+  Button,
+  Badge,
+  Spinner,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { REQUESTS_MOCK } from "../../mock";
 
 interface Request {
@@ -15,8 +23,8 @@ const RequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const role = localStorage.getItem("role") || "";
-  const username = localStorage.getItem("username") || "";
+  const role = sessionStorage.getItem("role") || "";
+  const username = sessionStorage.getItem("username") || "";
 
   useEffect(() => {
     setTimeout(() => {
@@ -43,8 +51,8 @@ const RequestsPage: React.FC = () => {
     );
   };
 
-  const filteredRequests = requests.filter(
-    (req) => role === "student" ? req.requester === username : true
+  const filteredRequests = requests.filter((req) =>
+    role === "STUDENT" ? req.requester === username : true
   );
 
   return (
@@ -68,7 +76,7 @@ const RequestsPage: React.FC = () => {
               <th>Requester</th>
               <th>Status</th>
               <th>Due Date</th> {/* New column */}
-              {role !== "student" && <th>Actions</th>}
+              {role !== "STUDENT" && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -93,7 +101,7 @@ const RequestsPage: React.FC = () => {
                   </Badge>
                 </td>
                 <td>{req.dueDate}</td> {/* Display due date */}
-                {role !== "student" && (
+                {role !== "STUDENT" && (
                   <td>
                     {req.status === "Pending" && (
                       <>

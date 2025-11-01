@@ -47,25 +47,42 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
           <td>{item.condition}</td>
           <td>{item.quantity}</td>
           <td>
-            <Badge bg={item.available > 0 ? "success" : "danger"}>{item.available}</Badge>
+            <Badge bg={item.available > 0 ? "success" : "danger"}>
+              {item.available}
+            </Badge>
           </td>
           <td>
-            {userRole === "student" && (
-              <Button size="sm" variant="primary" onClick={() => onRequest(item.id)}>
+            {userRole === "STUDENT" && (
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => onRequest(item.id)}
+              >
                 Request
               </Button>
             )}
-            {userRole === "admin" && (
+            {userRole === "ADMIN" && (
               <>
-                <Button size="sm" variant="warning" className="me-2" onClick={() => onEdit(item.id)}>
+                <Button
+                  size="sm"
+                  variant="warning"
+                  className="me-2"
+                  onClick={() => onEdit(item.id)}
+                >
                   <FaEdit />
                 </Button>
-                <Button size="sm" variant="danger" onClick={() => onDelete(item.id)}>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => onDelete(item.id)}
+                >
                   <FaTrash />
                 </Button>
               </>
             )}
-            {userRole === "staff" && <span className="text-muted">View Only</span>}
+            {userRole === "STAFF" && (
+              <span className="text-muted">View Only</span>
+            )}
           </td>
         </tr>
       ))}
