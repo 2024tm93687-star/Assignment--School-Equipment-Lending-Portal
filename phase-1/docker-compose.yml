@@ -2,7 +2,7 @@ version: "3.9"
 services:
   auth-service:
     build:
-      context: ./phase-1/server/auth-service
+      context: ./server/auth-service
     ports:
       - "8080:8080"
     environment:
@@ -10,11 +10,9 @@ services:
     restart: unless-stopped
   client:
     build:
-      context: ./phase-1/client
+      context: ./client
     ports:
       - "5173:80"
     depends_on:
       - auth-service
     restart: unless-stopped
-
-

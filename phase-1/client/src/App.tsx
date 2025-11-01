@@ -10,23 +10,26 @@ import Signup from "./pages/sign-up/SignUp";
 
 const App: React.FC = () => {
   return (
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/sign-up" element={<Signup />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Base route redirect */}
+        <Route path="/" element={<Login />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/equipment-list" element={<EquipmentList />} />
-              <Route path="/requests" element={<Requests />} />
-          </Route>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/sign-up" element={<Signup />} />
 
-          {/* Redirect unknown routes */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BrowserRouter>
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/equipment-list" element={<EquipmentList />} />
+          <Route path="/requests" element={<Requests />} />
+        </Route>
+
+        {/* Redirect unknown routes */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
