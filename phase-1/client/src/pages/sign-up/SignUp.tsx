@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Form, Button, Alert, Card } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Alert,
+  Card,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { signupThunk } from "../../features/auth/auth-thunks";
@@ -35,7 +43,7 @@ const Signup: React.FC = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) navigate("/dashboard");
   }, [navigate]);
 
@@ -49,9 +57,17 @@ const Signup: React.FC = () => {
     setError("");
     setSuccess("");
 
-    const { username, password, confirmPassword, fullName, email, department } = formData;
+    const { username, password, confirmPassword, fullName, email, department } =
+      formData;
 
-    if (!username || !password || !confirmPassword || !fullName || !email || !department) {
+    if (
+      !username ||
+      !password ||
+      !confirmPassword ||
+      !fullName ||
+      !email ||
+      !department
+    ) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -199,7 +215,12 @@ const Signup: React.FC = () => {
                   </Col>
                 </Row>
 
-                <Button variant="primary" type="submit" className="w-100 fw-semibold" disabled={loading}>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  className="w-100 fw-semibold"
+                  disabled={loading}
+                >
                   {loading ? "Creating account..." : "Sign Up"}
                 </Button>
               </Form>

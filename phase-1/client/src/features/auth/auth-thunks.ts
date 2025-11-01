@@ -1,5 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { LoginError, LoginResponse, SignupRequest, SignupResponse, Role, CurrentUserResponse } from "./types";
+import type {
+  LoginError,
+  LoginResponse,
+  SignupRequest,
+  SignupResponse,
+  Role,
+  CurrentUserResponse,
+} from "./types";
 import { apiFetch } from "../../utils/api";
 
 const AUTH_BASE_URL = "http://localhost:8080/api/auth";
@@ -15,8 +22,8 @@ export const loginThunk = createAsyncThunk<
       body: JSON.stringify({ username, password }),
     })) as LoginResponse;
 
-    localStorage.setItem("token", res.token);
-    localStorage.setItem("tokenType", res.tokenType);
+    sessionStorage.setItem("token", res.token);
+    sessionStorage.setItem("tokenType", res.tokenType);
 
     const me = (await apiFetch(`${AUTH_BASE_URL}/me`)) as CurrentUserResponse;
 
@@ -42,8 +49,8 @@ export const signupThunk = createAsyncThunk<
       body: JSON.stringify(data),
     })) as SignupResponse;
 
-    localStorage.setItem("token", res.token);
-    localStorage.setItem("tokenType", res.tokenType);
+    sessionStorage.setItem("token", res.token);
+    sessionStorage.setItem("tokenType", res.tokenType);
 
     const me = (await apiFetch(`${AUTH_BASE_URL}/me`)) as CurrentUserResponse;
 
@@ -64,7 +71,7 @@ export const fetchCurrentUserThunk = createAsyncThunk<
   { rejectValue: LoginError }
 >("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       return rejectWithValue("No token found");
     }

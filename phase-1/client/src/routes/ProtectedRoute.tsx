@@ -19,7 +19,7 @@ const ProtectedRoute: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       dispatch(fetchCurrentUserThunk());
     }

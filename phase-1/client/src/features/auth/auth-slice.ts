@@ -3,7 +3,7 @@ import { loginThunk, signupThunk, fetchCurrentUserThunk } from "./auth-thunks";
 import type { AuthState } from "./types";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-const token = localStorage.getItem("token");
+const token = sessionStorage.getItem("token");
 
 const initialState: AuthState = {
   username: null,
@@ -24,8 +24,8 @@ const authSlice = createSlice({
       state.role = null;
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenType");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("tokenType");
     },
   },
   extraReducers: (builder) => {
@@ -36,7 +36,15 @@ const authSlice = createSlice({
       })
       .addCase(
         loginThunk.fulfilled,
-        (state, action: PayloadAction<{ username: string; role: AuthState["role"]; token: string; fullName?: string }>) => {
+        (
+          state,
+          action: PayloadAction<{
+            username: string;
+            role: AuthState["role"];
+            token: string;
+            fullName?: string;
+          }>
+        ) => {
           state.loading = false;
           state.username = action.payload.username;
           state.role = action.payload.role;
@@ -55,7 +63,15 @@ const authSlice = createSlice({
       })
       .addCase(
         signupThunk.fulfilled,
-        (state, action: PayloadAction<{ username: string; role: AuthState["role"]; token: string; fullName?: string }>) => {
+        (
+          state,
+          action: PayloadAction<{
+            username: string;
+            role: AuthState["role"];
+            token: string;
+            fullName?: string;
+          }>
+        ) => {
           state.loading = false;
           state.username = action.payload.username;
           state.role = action.payload.role;
@@ -74,7 +90,14 @@ const authSlice = createSlice({
       })
       .addCase(
         fetchCurrentUserThunk.fulfilled,
-        (state, action: PayloadAction<{ username: string; role: AuthState["role"]; fullName?: string }>) => {
+        (
+          state,
+          action: PayloadAction<{
+            username: string;
+            role: AuthState["role"];
+            fullName?: string;
+          }>
+        ) => {
           state.loading = false;
           state.username = action.payload.username;
           state.role = action.payload.role;
