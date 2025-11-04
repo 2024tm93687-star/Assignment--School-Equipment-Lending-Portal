@@ -1,15 +1,7 @@
 import React from "react";
 import { Table, Button, Badge } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
-
-interface Equipment {
-  id: string;
-  name: string;
-  category: string;
-  condition: string;
-  quantity: number;
-  available: number;
-}
+import type { Equipment } from "../../features/equipment/types";
 
 interface EquipmentTableProps {
   equipment: Equipment[];
@@ -18,6 +10,24 @@ interface EquipmentTableProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
+
+const getConditionBadgeColor = (condition: string) => {
+  switch (condition.toLowerCase()) {
+    case "new":
+      return "primary";
+    case "good":
+      return "success";
+    case "fair":
+      return "info";
+    case "poor":
+      return "warning";
+    case "damaged":
+    case "retired":
+      return "danger";
+    default:
+      return "secondary";
+  }
+};
 
 const EquipmentTable: React.FC<EquipmentTableProps> = ({
   equipment,
@@ -29,7 +39,6 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
   <Table striped bordered hover responsive>
     <thead>
       <tr>
-        <th>ID</th>
         <th>Name</th>
         <th>Category</th>
         <th>Condition</th>
@@ -40,11 +49,14 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
     </thead>
     <tbody>
       {equipment.map((item) => (
-        <tr key={item.id}>
-          <td>{item.id}</td>
+        <tr key={item._id}>
           <td>{item.name}</td>
           <td>{item.category}</td>
-          <td>{item.condition}</td>
+          <td>
+            <Badge bg={getConditionBadgeColor(item.condition)}>
+              {item.condition.charAt(0).toUpperCase() + item.condition.slice(1)}
+            </Badge>
+          </td>
           <td>{item.quantity}</td>
           <td>
             <Badge bg={item.available > 0 ? "success" : "danger"}>
@@ -56,7 +68,11 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
               <Button
                 size="sm"
                 variant="primary"
-                onClick={() => onRequest(item.id)}
+                onClick={() => {
+                  console.log("EquipmentTable: Request clicked", item._id);
+                  onRequest(item._id);
+                }}
+                disabled={item.available === 0}
               >
                 Request
               </Button>
@@ -67,14 +83,20 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
                   size="sm"
                   variant="warning"
                   className="me-2"
-                  onClick={() => onEdit(item.id)}
+                  onClick={() => {
+                    console.log("EquipmentTable: Edit clicked", item._id);
+                    onEdit(item._id);
+                  }}
                 >
                   <FaEdit />
                 </Button>
                 <Button
                   size="sm"
                   variant="danger"
-                  onClick={() => onDelete(item.id)}
+                  onClick={() => {
+                    console.log("EquipmentTable: Delete clicked", item._id);
+                    onDelete(item._id);
+                  }}
                 >
                   <FaTrash />
                 </Button>
