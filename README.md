@@ -4,5 +4,5 @@ A **web-based portal** for managing and tracking school equipment lending. The p
 
 ## How to run
 
-- Go to ./phase-1 to find details to run manual written version of code
-- Go to ./phase-2 to find details to run AI-Assisted version of code
+- See ./phase-1/README.md to find details to run manual written version of code
+- Go to ./phase-2/README.md to find details to run AI-Assisted version of code
