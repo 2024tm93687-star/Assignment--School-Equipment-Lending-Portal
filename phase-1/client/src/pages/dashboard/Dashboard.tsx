@@ -1,20 +1,45 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { Container, Row, Col, Card, Table, Badge } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../store";
 import { REQUESTS_MOCK } from "../../mock";
+import type { AppDispatch } from "../../store/store";
+import { fetchEquipments } from "../../features/equipment/equipment-thunks";
+import type { Equipment } from "../../features/equipment/types";
 
 const Dashboard: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const { fullName, role } = useSelector((state: RootState) => state.auth) as {
     fullName: string;
     role: string;
   };
 
+  useEffect(() => {
+    dispatch(fetchEquipments());
+  }, [dispatch]);
+
+  const equipmentItems = useSelector(
+    (state: RootState) => state.equipment.items
+  ) as Equipment[];
+
+  const availableList = useMemo(
+    () => equipmentItems.filter((e) => e.available > 0).slice(0, 5),
+    [equipmentItems]
+  );
+
   const cards = [
-    { title: "Available Equipment", value: 24, color: "primary" },
-    { title: "Total Requests", value: 18, color: "info" },
-    { title: "Pending Requests", value: 5, color: "warning" },
-    { title: "Returned Equipment", value: 10, color: "success" },
+    {
+      title: "Total Equipment",
+      value: equipmentItems.length,
+      color: "primary",
+    },
+    {
+      title: "Available Equipment",
+      value: equipmentItems.filter((e) => e.available > 0).length,
+      color: "info",
+    },
+    { title: "Total Requests", value: 18, color: "warning" },
+    { title: "Pending Requests", value: 5, color: "success" },
   ];
 
   return (

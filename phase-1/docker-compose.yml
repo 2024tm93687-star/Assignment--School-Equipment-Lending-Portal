@@ -1,5 +1,12 @@
 version: "3.9"
 services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
   auth-service:
     build:
       context: ./server/auth-service
@@ -8,6 +15,20 @@ services:
     environment:
       - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75
     restart: unless-stopped
+
+  equipment-service:
+    build:
+      context: ./server/equipment-service
+    ports:
+      - "3000:3000"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8080
+      - MONGODB_URL=mongodb://mongodb:27017/equipmentdb
+    depends_on:
+      - mongodb
+      - auth-service
+    restart: unless-stopped
+
   client:
     build:
       context: ./client
@@ -15,4 +36,11 @@ services:
       - "5173:80"
     depends_on:
       - auth-service
+      - equipment-service
+    environment:
+      - VITE_EQUIPMENT_SERVICE_URL=http://localhost:3000/api/equipment
+      - VITE_AUTH_SERVICE_URL=http://localhost:8080/api/auth
     restart: unless-stopped
+
+volumes:
+  mongodb_data:

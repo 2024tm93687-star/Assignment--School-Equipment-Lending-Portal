@@ -8,8 +8,7 @@ import type {
   CurrentUserResponse,
 } from "./types";
 import { apiFetch } from "../../utils/api";
-
-const AUTH_BASE_URL = "http://localhost:8080/api/auth";
+import { AUTH_SERVICE_URL } from "../../utils/api-constants";
 
 export const loginThunk = createAsyncThunk<
   { username: string; role: Role; token: string; fullName?: string },
@@ -17,7 +16,7 @@ export const loginThunk = createAsyncThunk<
   { rejectValue: LoginError }
 >("auth/loginThunk", async ({ username, password }, { rejectWithValue }) => {
   try {
-    const res = (await apiFetch(`${AUTH_BASE_URL}/login`, {
+    const res = (await apiFetch(`${AUTH_SERVICE_URL}/login`, {
       method: "POST",
       body: JSON.stringify({ username, password }),
     })) as LoginResponse;
@@ -25,7 +24,9 @@ export const loginThunk = createAsyncThunk<
     sessionStorage.setItem("token", res.token);
     sessionStorage.setItem("tokenType", res.tokenType);
 
-    const me = (await apiFetch(`${AUTH_BASE_URL}/me`)) as CurrentUserResponse;
+    const me = (await apiFetch(
+      `${AUTH_SERVICE_URL}/me`
+    )) as CurrentUserResponse;
 
     return {
       username: me.username,
@@ -44,7 +45,7 @@ export const signupThunk = createAsyncThunk<
   { rejectValue: LoginError }
 >("auth/signupThunk", async (data, { rejectWithValue }) => {
   try {
-    const res = (await apiFetch(`${AUTH_BASE_URL}/signup`, {
+    const res = (await apiFetch(`${AUTH_SERVICE_URL}/signup`, {
       method: "POST",
       body: JSON.stringify(data),
     })) as SignupResponse;
@@ -52,7 +53,9 @@ export const signupThunk = createAsyncThunk<
     sessionStorage.setItem("token", res.token);
     sessionStorage.setItem("tokenType", res.tokenType);
 
-    const me = (await apiFetch(`${AUTH_BASE_URL}/me`)) as CurrentUserResponse;
+    const me = (await apiFetch(
+      `${AUTH_SERVICE_URL}/me`
+    )) as CurrentUserResponse;
 
     return {
       username: me.username,
@@ -75,7 +78,9 @@ export const fetchCurrentUserThunk = createAsyncThunk<
     if (!token) {
       return rejectWithValue("No token found");
     }
-    const me = (await apiFetch(`${AUTH_BASE_URL}/me`)) as CurrentUserResponse;
+    const me = (await apiFetch(
+      `${AUTH_SERVICE_URL}/me`
+    )) as CurrentUserResponse;
     return { username: me.username, role: me.role, fullName: me.fullName };
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to fetch user");
