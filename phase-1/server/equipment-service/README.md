@@ -60,7 +60,8 @@ All endpoints are prefixed with `/api/equipment`
   category: String,       // Equipment category (required)
   condition: String,      // One of: ['new', 'good', 'fair', 'poor', 'damaged', 'retired']
   quantity: Number,       // Total quantity owned (min: 0)
-  available: Number      // Available quantity for lending (min: 0)
+  available: Number,     // Available quantity for lending (min: 0)
+  _id : String          // database generated id
 }
 ```
 
@@ -118,7 +119,10 @@ npm start
       "category": "Lab Equipment",
       "condition": "good",
       "quantity": 10,
-      "available": 8
+      "available": 8,
+      "id": "68faa7297fdsd8dasd7",
+      "createdAt" : "",
+      "updatedAt" : ""
     }
   ]
 }
