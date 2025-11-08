@@ -2,7 +2,12 @@ import Borrow from '../../Models/requestModel.js';
 import logger from '../utils/logger.js';
 
 const mockBorrows = [
+  // Existing John Student entry (keeps one recent approved)
   { userId: 3, borrowerName: 'John Student', equipmentId: 'hp-laptop-1', equipmentName: 'HP Laptop', status: 'approved', issueDate: new Date(), dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), returnDate: null, remarks: 'For project', approvedBy: 2, createdAt: new Date() },
+  // Additional overdue entries for John Student (October 2025) to test overdue notifications
+  { userId: 3, borrowerName: 'John Student', equipmentId: 'hp-laptop-2', equipmentName: 'HP Laptop 2', status: 'approved', issueDate: new Date('2025-10-01T08:00:00Z'), dueDate: new Date('2025-10-08T08:00:00Z'), returnDate: null, remarks: 'Overdue test 1', approvedBy: 2, createdAt: new Date('2025-10-01T08:00:00Z') },
+  { userId: 3, borrowerName: 'John Student', equipmentId: 'camera-2', equipmentName: 'Digital Camera 2', status: 'approved', issueDate: new Date('2025-10-10T09:00:00Z'), dueDate: new Date('2025-10-17T09:00:00Z'), returnDate: null, remarks: 'Overdue test 2', approvedBy: 2, createdAt: new Date('2025-10-10T09:00:00Z') },
+  { userId: 3, borrowerName: 'John Student', equipmentId: 'vr-2', equipmentName: 'VR Headset 2', status: 'approved', issueDate: new Date('2025-10-15T10:00:00Z'), dueDate: new Date('2025-10-22T10:00:00Z'), returnDate: null, remarks: 'Overdue test 3', approvedBy: 2, createdAt: new Date('2025-10-15T10:00:00Z') },
   { userId: 2, borrowerName: 'Staff Member', equipmentId: 'microscope-1', equipmentName: 'Laboratory Microscope', status: 'pending', issueDate: new Date(), dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), returnDate: null, remarks: 'Lab session', approvedBy: null, createdAt: new Date() },
   { userId: 4, borrowerName: 'Alice Student', equipmentId: 'calculator-1', equipmentName: 'Scientific Calculator', status: 'pending', issueDate: new Date(), dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), returnDate: null, remarks: 'Homework', approvedBy: null, createdAt: new Date() },
   { userId: 5, borrowerName: 'Bob Student', equipmentId: 'camera-1', equipmentName: 'Digital Camera', status: 'approved', issueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), dueDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000), returnDate: null, remarks: 'Media club', approvedBy: 2, createdAt: new Date() },
@@ -60,7 +65,8 @@ export async function seedBorrows() {
           }
           if (!b.dueDate) {
             const issue = b.issueDate || new Date();
-            b.dueDate = new Date(issue.getTime() + 24 * 60 * 60 * 1000);
+            // default to 7 days from issue date
+            b.dueDate = new Date(issue.getTime() + 7 * 24 * 60 * 60 * 1000);
             changed = true;
           }
           if (!b.createdAt) {

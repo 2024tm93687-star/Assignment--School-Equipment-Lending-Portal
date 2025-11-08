@@ -39,9 +39,9 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
       try {
         const data = (await apiFetch(`${BORROW_SERVICE_URL}/borrows`)) as any[];
 
-        // Notifications: include overdue items and upcoming due (approved)
+        // Notifications: include ONLY overdue items
         const items = (data || [])
-          .filter((it) => it.dueDate && (it.status === 'approved' || it.status === 'overdue'))
+          .filter((it) => it.dueDate && (it.status === 'overdue'))
           .map((it) => ({
             _id: it._id,
             equipmentName: it.equipmentName || it.equipmentId,

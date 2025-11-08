@@ -81,11 +81,11 @@ app.put('/api/v1/borrow/:id/approve', authenticate, async (req, res) => {
     if ((status || '').toLowerCase() === 'approved') {
       // set issueDate to now if not set
       if (!borrow.issueDate) borrow.issueDate = new Date();
-      // set dueDate to next day of issueDate if not set
+      // set dueDate to 7 days from issueDate if not set
       if (!borrow.dueDate) {
         const issue = borrow.issueDate || new Date();
-        const nextDay = new Date(issue.getTime() + 24 * 60 * 60 * 1000);
-        borrow.dueDate = nextDay;
+        const sevenDays = new Date(issue.getTime() + 7 * 24 * 60 * 60 * 1000);
+        borrow.dueDate = sevenDays;
       }
     }
 
