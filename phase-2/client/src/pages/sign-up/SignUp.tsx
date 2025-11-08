@@ -8,6 +8,7 @@ import {
   Alert,
   Card,
 } from "react-bootstrap";
+import SimpleHeader from "../../components/header/SimpleHeader";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { signupThunk } from "../../features/auth/auth-thunks";
@@ -102,10 +103,9 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <Container
-      fluid
-      className="min-vh-100 d-flex justify-content-center align-items-center bg-dark text-light"
-    >
+    <>
+      <SimpleHeader title="Sign Up" />
+      <Container fluid className="min-vh-100 d-flex justify-content-center align-items-center">
       <Row className="w-100 justify-content-center py-4">
         <Col xs={10} sm={8} md={6} lg={5}>
           <Card bg="secondary" text="light" className="shadow-lg border-0 p-4">
@@ -244,6 +244,7 @@ const Signup: React.FC = () => {
         </Col>
       </Row>
     </Container>
+    </>
   );
 };
 

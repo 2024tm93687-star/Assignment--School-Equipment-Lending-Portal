@@ -8,6 +8,7 @@ import {
   Card,
   Alert,
 } from "react-bootstrap";
+import SimpleHeader from "../../components/header/SimpleHeader";
 import { FaUser, FaLock } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -39,10 +40,9 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Container
-      fluid
-      className="min-vh-100 d-flex justify-content-center align-items-center bg-dark text-light"
-    >
+    <>
+      <SimpleHeader title="Login" />
+      <Container fluid className="min-vh-100 d-flex justify-content-center align-items-center">
       <Row className="w-100 justify-content-center py-4">
         <Col xs={10} sm={8} md={6} lg={4}>
           <Card bg="secondary" text="light" className="shadow-lg border-0">
@@ -113,6 +113,7 @@ const LoginPage: React.FC = () => {
         </Col>
       </Row>
     </Container>
+    </>
   );
 };
 

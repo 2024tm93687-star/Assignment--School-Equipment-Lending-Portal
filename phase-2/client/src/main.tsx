@@ -4,6 +4,10 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import App from "./App";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { initTheme } from "./utils/theme";
+
+// initialize theme on app load (uses localStorage or system preference)
+initTheme();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

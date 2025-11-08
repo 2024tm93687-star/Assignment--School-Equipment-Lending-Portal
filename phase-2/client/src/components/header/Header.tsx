@@ -14,6 +14,7 @@ import type { RootState, AppDispatch } from "../../store";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../utils/api";
 import { BORROW_SERVICE_URL } from "../../utils/api-constants";
+import { getCurrentTheme, toggleTheme } from "../../utils/theme";
 
 interface HeaderProps {
   brand: React.ReactNode;
@@ -33,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
   const { username } = useSelector((state: RootState) => state.auth);
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [theme, setTheme] = useState(getCurrentTheme());
 
   const role = (sessionStorage.getItem("role") || "").toUpperCase();
 
@@ -65,6 +67,11 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
     loadNotifications();
   }, []);
 
+  const handleThemeToggle = () => {
+    const next = toggleTheme(theme as any);
+    setTheme(next);
+  };
+
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm py-3">
       <Container fluid>
@@ -72,7 +79,24 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
           {brand}
         </Navbar.Brand>
 
-        <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center">
+            <div className="me-3">
+              <div className="form-check form-switch m-0">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="theme-toggle"
+                  onChange={handleThemeToggle}
+                  checked={theme === "dark"}
+                />
+                {/* Keep label light so it remains readable on dark header */}
+                <label className="form-check-label small text-light ms-2" htmlFor="theme-toggle">
+                  {theme === "dark" ? "Dark" : "Light"}
+                </label>
+              </div>
+            </div>
+          </div>
           <Dropdown align="end">
             <Dropdown.Toggle
               as={Button}
