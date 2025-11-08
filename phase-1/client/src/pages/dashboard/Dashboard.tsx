@@ -53,6 +53,25 @@ const Dashboard: React.FC = () => {
         </Col>
       </Row>
 
+      <Row className="mb-4">
+        <Col xs={12} md={6} lg={4}>
+          <Card className="shadow-sm border-0">
+            <Card.Header>Popular Available Equipment</Card.Header>
+            <Card.Body>
+              {availableList.length === 0 ? (
+                <div className="text-muted">No equipment available</div>
+              ) : (
+                <ul className="mb-0">
+                  {availableList.map((e) => (
+                    <li key={e._id || e.name}>{e.name} ({e.available})</li>
+                  ))}
+                </ul>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
       <Row className="g-4 mb-4">
         {cards.map((card) => (
           <Col xs={12} sm={6} md={4} lg={3} key={card.title}>

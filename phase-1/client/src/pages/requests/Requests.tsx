@@ -8,51 +8,58 @@ import {
   Row,
   Col,
 } from "react-bootstrap";
-import { REQUESTS_MOCK } from "../../mock";
+import { apiFetch } from "../../utils/api";
+import { BORROW_SERVICE_URL } from "../../utils/api-constants";
 
-interface Request {
-  id: string;
-  equipment: string;
-  requester: string;
-  role: string;
-  status: "Pending" | "Approved" | "Rejected" | "Returned";
-  dueDate: string;
+interface RequestItem {
+  _id: string;
+  equipmentName?: string;
+  borrowerName?: string;
+  status?: string;
+  dueDate?: string;
 }
 
 const RequestsPage: React.FC = () => {
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const role = sessionStorage.getItem("role") || "";
   const username = sessionStorage.getItem("username") || "";
 
   useEffect(() => {
-    setTimeout(() => {
-      setRequests(REQUESTS_MOCK as Request[]);
-      setLoading(false);
-    }, 1000);
+    const load = async () => {
+      try {
+        const res = (await apiFetch(`${BORROW_SERVICE_URL}/borrows`)) as RequestItem[];
+        setRequests(res || []);
+      } catch (err) {
+        console.warn('Failed to load borrows', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
   const handleApprove = (id: string) => {
     setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: "Approved" } : req))
+      prev.map((req) => (req._id === id ? { ...req, status: "approved" } : req))
     );
   };
 
   const handleReject = (id: string) => {
     setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: "Rejected" } : req))
+      prev.map((req) => (req._id === id ? { ...req, status: "rejected" } : req))
     );
   };
 
   const handleMarkReturned = (id: string) => {
     setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: "Returned" } : req))
+      prev.map((req) => (req._id === id ? { ...req, status: "returned" } : req))
     );
   };
 
   const filteredRequests = requests.filter((req) =>
-    role === "STUDENT" ? req.requester === username : true
+    role === "STUDENT" ? req.borrowerName === username : true
   );
 
   return (
@@ -80,61 +87,61 @@ const RequestsPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredRequests.map((req) => (
-              <tr key={req.id}>
-                <td>{req.id}</td>
-                <td>{req.equipment}</td>
-                <td>{req.requester}</td>
-                <td>
-                  <Badge
-                    bg={
-                      req.status === "Pending"
-                        ? "warning"
-                        : req.status === "Approved"
-                        ? "success"
-                        : req.status === "Rejected"
-                        ? "danger"
-                        : "secondary"
-                    }
-                  >
-                    {req.status}
-                  </Badge>
-                </td>
-                <td>{req.dueDate}</td> {/* Display due date */}
-                {role !== "STUDENT" && (
-                  <td>
-                    {req.status === "Pending" && (
-                      <>
-                        <Button
-                          variant="success"
-                          size="sm"
-                          className="me-2"
-                          onClick={() => handleApprove(req.id)}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleReject(req.id)}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                    {req.status === "Approved" && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleMarkReturned(req.id)}
+                {filteredRequests.map((req) => (
+                  <tr key={req._id}>
+                    <td>{req._id}</td>
+                    <td>{req.equipmentName || req._id}</td>
+                    <td>{req.borrowerName}</td>
+                    <td>
+                      <Badge
+                        bg={
+                          req.status === "pending"
+                            ? "warning"
+                            : req.status === "approved"
+                            ? "success"
+                            : req.status === "rejected"
+                            ? "danger"
+                            : "secondary"
+                        }
                       >
-                        Mark Returned
-                      </Button>
+                        {req.status}
+                      </Badge>
+                    </td>
+                    <td>{req.dueDate ? new Date(req.dueDate).toLocaleDateString() : ''}</td>
+                    {role !== "STUDENT" && (
+                      <td>
+                        {req.status === "pending" && (
+                          <>
+                            <Button
+                              variant="success"
+                              size="sm"
+                              className="me-2"
+                              onClick={() => handleApprove(req._id)}
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleReject(req._id)}
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                        {req.status === "approved" && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleMarkReturned(req._id)}
+                          >
+                            Mark Returned
+                          </Button>
+                        )}
+                      </td>
                     )}
-                  </td>
-                )}
-              </tr>
-            ))}
+                  </tr>
+                ))}
           </tbody>
         </Table>
       )}
