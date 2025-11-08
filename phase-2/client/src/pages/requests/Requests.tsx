@@ -8,6 +8,7 @@ import {
   Row,
   Col,
   Form,
+  Modal,
 } from "react-bootstrap";
 import { apiFetch } from "../../utils/api";
 import { BORROW_SERVICE_URL } from "../../utils/api-constants";
@@ -25,6 +26,10 @@ const RequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [equipmentFilter, setEquipmentFilter] = useState<string>("");
+  const [showEditDueModal, setShowEditDueModal] = useState(false);
+  const [editingDueId, setEditingDueId] = useState<string | null>(null);
+  const [editingDueDate, setEditingDueDate] = useState<string>("");
+  const [editDueError, setEditDueError] = useState<string | null>(null);
   const [requesterFilter, setRequesterFilter] = useState<string>("");
 
   const role = sessionStorage.getItem("role") || "";
@@ -84,6 +89,45 @@ const RequestsPage: React.FC = () => {
     })();
   };
 
+  const openEditDueModal = (id: string, currentDue?: string | null) => {
+    setEditingDueId(id);
+    setEditDueError(null);
+    if (currentDue) {
+      try {
+        setEditingDueDate(new Date(currentDue).toISOString().slice(0,10));
+      } catch (e) {
+        setEditingDueDate(new Date().toISOString().slice(0,10));
+      }
+    } else {
+      setEditingDueDate(new Date().toISOString().slice(0,10));
+    }
+    setShowEditDueModal(true);
+  };
+
+  const submitEditDue = async () => {
+    if (!editingDueId) return;
+    setEditDueError(null);
+    try {
+      await apiFetch(`${BORROW_SERVICE_URL}/borrow/${editingDueId}/dueDate`, {
+        method: 'PUT',
+        body: JSON.stringify({ dueDate: editingDueDate }),
+      });
+
+      // Refresh local list
+      const res = (await apiFetch(`${BORROW_SERVICE_URL}/borrows`)) as RequestItem[];
+      setRequests(res || []);
+      // notify header
+      try { window.dispatchEvent(new Event('borrows-changed')); } catch (e) {}
+
+      setShowEditDueModal(false);
+      setEditingDueId(null);
+      setEditingDueDate("");
+    } catch (err) {
+      console.error('Failed to update due date', err);
+      setEditDueError(err instanceof Error ? err.message : 'Failed to update due date');
+    }
+  };
+
   // Server already scopes borrows by authenticated user (students receive only their records)
   // Apply local filters for equipment name and requester.
   const filteredRequests = requests.filter((req) => {
@@ -97,6 +141,7 @@ const RequestsPage: React.FC = () => {
   });
 
   return (
+    <>
     <Container fluid className="p-4">
       <Row className="mb-3">
         <Col>
@@ -205,6 +250,15 @@ const RequestsPage: React.FC = () => {
                             Mark Returned
                           </Button>
                         )}
+                        {/* Admin: edit due date (allow past dates for demo) */}
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="ms-2"
+                          onClick={() => openEditDueModal(req._id, req.dueDate)}
+                        >
+                          Edit Due Date
+                        </Button>
                       </td>
                     )}
                   </tr>
@@ -214,6 +268,35 @@ const RequestsPage: React.FC = () => {
         </>
       )}
     </Container>
+    {/* Edit Due Date Modal (admin) */}
+    <Modal show={showEditDueModal} onHide={() => setShowEditDueModal(false)} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Due Date</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          <Form.Group className="mb-3" controlId="editDueDate">
+            <Form.Label>Due Date</Form.Label>
+            <Form.Control
+              type="date"
+              value={editingDueDate}
+              onChange={(e) => setEditingDueDate(e.target.value)}
+            />
+            <div className="small text-muted mt-2">Admins can select past dates for demo purposes.</div>
+            {editDueError && <div className="text-danger small mt-2">{editDueError}</div>}
+          </Form.Group>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowEditDueModal(false)}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={() => submitEditDue()}>
+          Save
+        </Button>
+      </Modal.Footer>
+    </Modal>
+    </>
   );
 };
 

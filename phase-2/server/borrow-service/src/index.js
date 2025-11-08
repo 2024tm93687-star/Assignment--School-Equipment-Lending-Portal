@@ -145,6 +145,57 @@ app.put('/api/v1/borrow/:id/approve', authenticate, async (req, res) => {
   }
 });
 
+// Allow admins/staff to modify the due date (includes allowing past dates for demo)
+app.put('/api/v1/borrow/:id/dueDate', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { dueDate } = req.body; // expected ISO date string or null
+
+    const borrow = await Borrow.findById(id);
+    if (!borrow) return res.status(404).json({ message: 'Borrow request not found' });
+
+    // Only staff/admin should be allowed; allow through authenticate middleware which sets role
+    const role = (req.user?.role || '').toLowerCase();
+    if (role !== 'staff' && role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    if (dueDate === null || dueDate === undefined || dueDate === '') {
+      borrow.dueDate = null;
+    } else {
+      const parsed = new Date(dueDate);
+      if (isNaN(parsed.getTime())) {
+        return res.status(400).json({ message: 'Invalid dueDate' });
+      }
+      borrow.dueDate = parsed;
+    }
+
+    // If borrow is approved, adjust overdue status based on new dueDate
+    try {
+      if ((borrow.status || '').toLowerCase() === 'approved') {
+        const now = new Date();
+        if (borrow.dueDate && borrow.dueDate < now) {
+          borrow.status = 'overdue';
+        }
+      } else if ((borrow.status || '').toLowerCase() === 'overdue') {
+        // if moved to future date, set back to approved
+        const now = new Date();
+        if (borrow.dueDate && borrow.dueDate >= now) {
+          borrow.status = 'approved';
+        }
+      }
+    } catch (e) {
+      logger.error('Error adjusting status after dueDate change', e);
+    }
+
+    const updated = await borrow.save();
+    res.json({ message: 'Due date updated', data: updated });
+  } catch (err) {
+    logger.error('Error updating due date', err);
+    res.status(500).json({ message: 'Error updating due date', error: err.message });
+  }
+});
+
 // List borrows. Students see only their records; staff/admin see all
 app.get('/api/v1/borrows', authenticate, async (req, res) => {
   try {
