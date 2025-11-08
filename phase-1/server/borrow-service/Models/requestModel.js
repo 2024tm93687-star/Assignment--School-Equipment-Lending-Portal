@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 
 const requestSchema = new mongoose.Schema({
   userId: Number,
-  equipmentId: Number,
+  borrowerName: String,
+  equipmentId: mongoose.Schema.Types.Mixed,
+  equipmentName: String,
   status: String,
   issueDate: Date,
   dueDate: Date,

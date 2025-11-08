@@ -29,6 +29,19 @@ services:
       - auth-service
     restart: unless-stopped
 
+  borrow-service:
+    build:
+      context: ./server/borrow-service
+    ports:
+      - "3010:3010"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8080
+      - MONGODB_URL=mongodb://mongodb:27017/borrowdb
+    depends_on:
+      - mongodb
+      - auth-service
+    restart: unless-stopped
+
   client:
     build:
       context: ./client
@@ -40,6 +53,7 @@ services:
     environment:
       - VITE_EQUIPMENT_SERVICE_URL=http://localhost:3000/api/equipment
       - VITE_AUTH_SERVICE_URL=http://localhost:8080/api/auth
+      - VITE_BORROW_SERVICE_URL=http://localhost:3010/api/v1
     restart: unless-stopped
 
 volumes:

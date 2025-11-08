@@ -65,9 +65,16 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
       // Specific error handling for different status codes
       switch (response.status) {
         case 401:
-          // Clear token on authentication failure
+          // Clear token on authentication failure and redirect to login
           sessionStorage.removeItem("token");
           sessionStorage.removeItem("tokenType");
+          try {
+            // Use replace to avoid keeping a broken session in history
+            window.location.replace('/login');
+          } catch (e) {
+            // Fallback: set href
+            try { window.location.href = '/login'; } catch (err) { /* ignore */ }
+          }
           throw new Error("Authentication failed. Please log in again.");
         case 403:
           throw new Error("You do not have permission to perform this action.");
