@@ -24,8 +24,11 @@ const authSlice = createSlice({
       state.role = null;
       state.token = null;
       state.isAuthenticated = false;
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("tokenType");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("tokenType");
+        sessionStorage.removeItem("role");
+        sessionStorage.removeItem("username");
+        sessionStorage.removeItem("fullName");
     },
   },
   extraReducers: (builder) => {

@@ -15,6 +15,9 @@ import {
   updateEquipment,
   deleteEquipment,
 } from "../../features/equipment/equipment-thunks";
+import { apiFetch } from "../../utils/api";
+import { BORROW_SERVICE_URL } from "../../utils/api-constants";
+import { useNavigate } from "react-router-dom";
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20];
 
@@ -87,8 +90,31 @@ const EquipmentList: React.FC = () => {
   }, [totalPages, currentPage]);
 
   // Action handlers
-  const handleRequest = (id: string) =>
-    alert(`Request sent for equipment ID: eq-${id}`);
+  const navigate = useNavigate();
+
+  const handleRequest = async (id: string) => {
+    try {
+      const item = equipment.find((e) => e._id === id);
+      if (!item) return;
+
+      // Call borrow-service to create a pending request
+      await apiFetch(`${BORROW_SERVICE_URL}/borrow`, {
+        method: 'POST',
+        body: JSON.stringify({
+          equipmentId: id,
+          equipmentName: item.name,
+          // userId will be set by borrow-service from the auth validate result if not provided
+        }),
+      });
+
+      // Navigate to requests page so the new pending request is visible
+      navigate('/requests');
+    } catch (err) {
+      console.error('Failed to create borrow request', err);
+      const msg = err instanceof Error ? err.message : 'Failed to send request. Please try again.';
+      alert(msg);
+    }
+  };
 
   const handleAdd = () => setShowAddModal(true);
 

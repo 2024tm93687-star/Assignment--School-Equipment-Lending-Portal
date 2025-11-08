@@ -26,6 +26,60 @@ export async function seedBorrows() {
     } else {
       logger.info('Borrow data already exists, skipping seed');
     }
+    // Migration: ensure existing records have essential fields (userId, borrowerName, issueDate, dueDate)
+    try {
+      const query = {
+        $or: [
+          { userId: { $exists: false } },
+          { userId: null },
+          { borrowerName: { $exists: false } },
+          { borrowerName: null },
+          { issueDate: { $exists: false } },
+          { issueDate: null },
+          { dueDate: { $exists: false } },
+          { $and: [ { dueDate: null } ] },
+        ],
+      };
+
+      const toFix = await Borrow.find(query).limit(500);
+      if (toFix.length > 0) {
+        logger.info(`Found ${toFix.length} borrow records to patch with sample data`);
+        for (const b of toFix) {
+          let changed = false;
+          if (!b.userId) {
+            b.userId = 9999; // sample requester id
+            changed = true;
+          }
+          if (!b.borrowerName) {
+            b.borrowerName = `sample_user_${b.userId}`;
+            changed = true;
+          }
+          if (!b.issueDate) {
+            b.issueDate = new Date();
+            changed = true;
+          }
+          if (!b.dueDate) {
+            const issue = b.issueDate || new Date();
+            b.dueDate = new Date(issue.getTime() + 24 * 60 * 60 * 1000);
+            changed = true;
+          }
+          if (!b.createdAt) {
+            b.createdAt = new Date();
+            changed = true;
+          }
+          if (changed) {
+            try {
+              await b.save();
+              logger.info(`Patched borrow ${b._id}`);
+            } catch (e) {
+              logger.error(`Failed to save patched borrow ${b._id}`, e);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      logger.error('Error patching existing borrow records', e);
+    }
   } catch (error) {
     logger.error('Error seeding borrow data:', error);
     throw error;

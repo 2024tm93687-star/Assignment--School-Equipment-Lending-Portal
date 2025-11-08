@@ -1,12 +1,14 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import fetch from 'node-fetch';
 import logger from './utils/logger.js';
 import Borrow from '../Models/requestModel.js';
 import authenticate from './middleware/authentication.js';
 import { seedBorrows } from './scripts/seedData.js';
 
 const PORT = process.env.PORT || 3010;
+const EQUIPMENT_SERVICE_URL = process.env.EQUIPMENT_SERVICE_URL || 'http://equipment-service:3000/api/equipment';
 const app = express();
 
 app.use(cors());
@@ -19,7 +21,11 @@ app.get('/api/test1', async (req, res) => {
 // Create borrow request (authenticated users)
 app.post('/api/v1/borrow', authenticate, async (req, res) => {
   try {
-    const { userId, borrowerName, equipmentId, equipmentName, issueDate, dueDate, remarks } = req.body;
+    const { userId: bodyUserId, borrowerName: bodyBorrowerName, equipmentId, equipmentName, issueDate, dueDate, remarks } = req.body;
+
+    // Prefer authenticated user info when available
+    const userId = req.user?.userId ?? bodyUserId;
+    const borrowerName = bodyBorrowerName || req.user?.username || req.user?.fullName || '';
 
     // Prevent overlapping bookings for same equipment
     const overlap = await Borrow.findOne({
@@ -31,16 +37,28 @@ app.post('/api/v1/borrow', authenticate, async (req, res) => {
       return res.status(400).json({ message: 'Equipment already borrowed or booked by someone else.' });
     }
 
+    // Prevent same user requesting the same equipment if they already have one pending/approved
+    if (userId) {
+      const existingForUser = await Borrow.findOne({
+        equipmentId,
+        userId,
+        status: { $in: ['pending', 'approved'] }
+      });
+      if (existingForUser) {
+        return res.status(400).json({ message: 'Already one equipment is with them.' });
+      }
+    }
+
     const newBorrow = new Borrow({
       userId,
-      borrowerName: borrowerName || '',
+      borrowerName,
       equipmentId,
       equipmentName: equipmentName || '',
       issueDate: issueDate ? new Date(issueDate) : new Date(),
       dueDate: dueDate ? new Date(dueDate) : null,
       status: 'pending',
       remarks: remarks || '',
-      createdAt: new Date()
+      createdAt: new Date(),
     });
 
     const savedBorrow = await newBorrow.save();
@@ -55,7 +73,71 @@ app.post('/api/v1/borrow', authenticate, async (req, res) => {
 app.put('/api/v1/borrow/:id/approve', authenticate, async (req, res) => {
   try {
     const { status } = req.body; // 'approved' or 'rejected'
-    const updated = await Borrow.findByIdAndUpdate(req.params.id, { status, approvedBy: req.user.userId }, { new: true });
+
+    // Load borrow so we can set issueDate/dueDate when approving
+    const borrow = await Borrow.findById(req.params.id);
+    if (!borrow) return res.status(404).json({ message: 'Borrow request not found' });
+
+    if ((status || '').toLowerCase() === 'approved') {
+      // set issueDate to now if not set
+      if (!borrow.issueDate) borrow.issueDate = new Date();
+      // set dueDate to next day of issueDate if not set
+      if (!borrow.dueDate) {
+        const issue = borrow.issueDate || new Date();
+        const nextDay = new Date(issue.getTime() + 24 * 60 * 60 * 1000);
+        borrow.dueDate = nextDay;
+      }
+    }
+
+    borrow.status = status;
+    borrow.approvedBy = req.user.userId;
+    const updated = await borrow.save();
+
+  // If approved, decrement equipment availability via equipment-service
+    if (updated && (status || '').toLowerCase() === 'approved') {
+      try {
+        const authHeader = req.headers.authorization || '';
+        const maybeId = updated.equipmentId;
+        const isObjectId = typeof maybeId === 'string' && /^[0-9a-fA-F]{24}$/.test(maybeId);
+
+        const decAvailableById = async (eqId) => {
+          const url = `${EQUIPMENT_SERVICE_URL}/${eqId}`;
+          // Before decrementing, fetch equipment by name to get current available if needed
+          await fetch(url, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authHeader ? { Authorization: authHeader } : {}),
+            },
+            body: JSON.stringify({ $inc: { available: -1 } }),
+          });
+        };
+
+        if (isObjectId) {
+          await decAvailableById(maybeId);
+        } else if (updated.equipmentName) {
+          const query = `?name=${encodeURIComponent(updated.equipmentName)}`;
+          const listRes = await fetch(`${EQUIPMENT_SERVICE_URL}${query}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authHeader ? { Authorization: authHeader } : {}),
+            },
+          });
+          if (listRes.ok) {
+            const body = await listRes.json();
+            const items = body?.items || [];
+            if (items.length > 0) {
+              const eqId = items[0]._id;
+              await decAvailableById(eqId);
+            }
+          }
+        }
+      } catch (e) {
+        logger.error('Failed to decrement equipment availability on approve', e);
+      }
+    }
+
     res.json({ message: `Request ${status}`, data: updated });
   } catch (err) {
     logger.error('Error updating borrow status', err);
@@ -73,6 +155,17 @@ app.get('/api/v1/borrows', authenticate, async (req, res) => {
     } else {
       list = await Borrow.find();
     }
+    // Mark overdue borrows: approved and past dueDate and not returned
+    try {
+      const now = new Date();
+      // update server-side so clients receive correct status
+      await Borrow.updateMany({ status: { $in: ['approved'] }, dueDate: { $lt: now }, returnDate: null }, { $set: { status: 'overdue' } });
+      // refetch list to include any status changes
+      list = role === 'student' ? await Borrow.find({ userId: req.user.userId }) : await Borrow.find();
+    } catch (e) {
+      logger.error('Error updating overdue statuses', e);
+    }
+
     res.json(list);
   } catch (err) {
     logger.error('Error fetching borrows', err);
@@ -82,6 +175,75 @@ app.get('/api/v1/borrows', authenticate, async (req, res) => {
 
 app.get('/', (req, res) => {
   res.send('Welcome to Borrow Service');
+});
+
+// Mark a borrow as returned and increment equipment availability
+app.put('/api/v1/borrow/:id/return', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const borrow = await Borrow.findById(id);
+    if (!borrow) return res.status(404).json({ message: 'Borrow request not found' });
+
+    if ((borrow.status || '').toLowerCase() === 'returned') {
+      return res.status(400).json({ message: 'Already returned' });
+    }
+
+    // Update borrow status locally
+    borrow.status = 'returned';
+    borrow.returnDate = new Date();
+    await borrow.save();
+
+    // Attempt to notify equipment-service to increase available count
+    try {
+      const authHeader = req.headers.authorization || '';
+
+      // Helper to call equipment PUT by id with $inc operator
+      const incAvailableById = async (eqId) => {
+        const url = `${EQUIPMENT_SERVICE_URL}/${eqId}`;
+        await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authHeader ? { Authorization: authHeader } : {}),
+          },
+          body: JSON.stringify({ $inc: { available: 1 } }),
+        });
+      };
+
+      // If equipmentId is a possible ObjectId string, try direct update
+      const maybeId = borrow.equipmentId;
+      const isObjectId = typeof maybeId === 'string' && /^[0-9a-fA-F]{24}$/.test(maybeId);
+      if (isObjectId) {
+        await incAvailableById(maybeId);
+      } else if (borrow.equipmentName) {
+        // Try to find equipment by name then update by its _id
+        const query = `?name=${encodeURIComponent(borrow.equipmentName)}`;
+        const listRes = await fetch(`${EQUIPMENT_SERVICE_URL}${query}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authHeader ? { Authorization: authHeader } : {}),
+          },
+        });
+        if (listRes.ok) {
+          const body = await listRes.json();
+          const items = body?.items || [];
+          if (items.length > 0) {
+            const eqId = items[0]._id;
+            await incAvailableById(eqId);
+          }
+        }
+      }
+    } catch (e) {
+      // Log and continue; borrow is marked returned regardless of equipment-service result
+      logger.error('Failed to update equipment availability', e);
+    }
+
+    res.json({ message: 'Marked returned', data: borrow });
+  } catch (err) {
+    logger.error('Error marking return', err);
+    res.status(500).json({ message: 'Error marking returned', error: err.message });
+  }
 });
 
 // Connect to MongoDB and seed
