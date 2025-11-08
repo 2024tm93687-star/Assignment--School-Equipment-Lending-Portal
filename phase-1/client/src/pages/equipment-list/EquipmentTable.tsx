@@ -102,9 +102,6 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
                 </Button>
               </>
             )}
-            {userRole === "STAFF" && (
-              <span className="text-muted">View Only</span>
-            )}
           </td>
         </tr>
       ))}

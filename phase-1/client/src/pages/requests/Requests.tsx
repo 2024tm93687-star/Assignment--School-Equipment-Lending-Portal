@@ -147,9 +147,9 @@ const RequestsPage: React.FC = () => {
                             </Button>
                           </>
                         )}
-                        {req.status === "approved" && (
+                        {(req.status === "approved" || req.status === "overdue") && (
                           <Button
-                            variant="secondary"
+                            variant={req.status === "overdue" ? "warning" : "secondary"}
                             size="sm"
                             onClick={() => handleMarkReturned(req._id)}
                           >
