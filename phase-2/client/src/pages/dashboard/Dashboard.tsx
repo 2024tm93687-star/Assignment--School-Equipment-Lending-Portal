@@ -49,6 +49,17 @@ const Dashboard: React.FC = () => {
     (b) => (b.status || "").toLowerCase() === "pending"
   ).length;
 
+  // compute recent pending requests (most recent first) and limit to 5
+  const recentPending = borrows
+    .filter((b) => (b.status || "").toLowerCase() === "pending")
+    .slice()
+    .sort((a, b) => {
+      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return tb - ta;
+    })
+    .slice(0, 5);
+
   const cards = [
     {
       title: "Total Equipment",
@@ -108,19 +119,14 @@ const Dashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {borrows
-                      .slice()
-                      .sort((a, b) => {
-                        const ta = a.createdAt
-                          ? new Date(a.createdAt).getTime()
-                          : 0;
-                        const tb = b.createdAt
-                          ? new Date(b.createdAt).getTime()
-                          : 0;
-                        return tb - ta;
-                      })
-                      .slice(0, 10)
-                      .map((req) => (
+                    {recentPending.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="text-center text-muted">
+                          No pending requests
+                        </td>
+                      </tr>
+                    ) : (
+                      recentPending.map((req) => (
                         <tr key={req._id || req.id}>
                           <td>{req._id || req.id}</td>
                           <td>{req.equipmentName || req.equipment}</td>
@@ -130,8 +136,7 @@ const Dashboard: React.FC = () => {
                               bg={
                                 (req.status || "").toLowerCase() === "pending"
                                   ? "warning"
-                                  : (req.status || "").toLowerCase() ===
-                                    "approved"
+                                  : (req.status || "").toLowerCase() === "approved"
                                   ? "success"
                                   : "secondary"
                               }
@@ -140,10 +145,14 @@ const Dashboard: React.FC = () => {
                             </Badge>
                           </td>
                         </tr>
-                      ))}
+                      ))
+                    )}
                   </tbody>
                 </Table>
               </Card.Body>
+              <Card.Footer className="bg-transparent border-0 text-muted small">
+                Showing the five most recent pending requests.
+              </Card.Footer>
             </Card>
           </Col>
         </Row>
