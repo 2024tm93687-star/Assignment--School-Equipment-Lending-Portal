@@ -16,6 +16,7 @@ interface RequestItem {
   _id: string;
   equipmentName?: string;
   borrowerName?: string;
+  issueDate?: string;
   status?: string;
   dueDate?: string;
 }
@@ -143,8 +144,9 @@ const RequestsPage: React.FC = () => {
               <th>ID</th>
               <th>Equipment</th>
               <th>Requester</th>
+              <th>Issue Date</th>
               <th>Status</th>
-              <th>Due Date</th> {/* New column */}
+              <th>Due Date</th>
               {role !== "STUDENT" && <th>Actions</th>}
             </tr>
           </thead>
@@ -154,6 +156,7 @@ const RequestsPage: React.FC = () => {
                     <td>{req._id}</td>
                     <td>{req.equipmentName || req._id}</td>
                     <td>{req.borrowerName}</td>
+                    <td>{req.issueDate ? new Date(req.issueDate).toLocaleDateString() : ''}</td>
                     <td>
                       <Badge
                         bg={
