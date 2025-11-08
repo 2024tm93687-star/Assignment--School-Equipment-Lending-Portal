@@ -67,6 +67,12 @@ const RequestsPage: React.FC = () => {
       try {
         await apiFetch(`${BORROW_SERVICE_URL}/borrow/${id}/return`, { method: 'PUT' });
         setRequests((prev) => prev.map((req) => (req._id === id ? { ...req, status: 'returned' } : req)));
+        // Notify other parts of the app (e.g., header) that borrows changed so notifications refresh
+        try {
+          window.dispatchEvent(new Event('borrows-changed'));
+        } catch (e) {
+          // ignore if environment doesn't support window events
+        }
       } catch (err) {
         console.error('Failed to mark returned', err);
         // Optionally show a UI error/notification here

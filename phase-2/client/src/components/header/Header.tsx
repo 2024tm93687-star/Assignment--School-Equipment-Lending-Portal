@@ -64,7 +64,19 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
         console.warn("Failed to load notifications", err);
       }
     };
+
+    // initial load
     loadNotifications();
+
+    // listen for global changes to borrows so notifications refresh immediately
+    const listener = () => {
+      loadNotifications();
+    };
+    window.addEventListener("borrows-changed", listener);
+
+    return () => {
+      window.removeEventListener("borrows-changed", listener);
+    };
   }, []);
 
   const handleThemeToggle = () => {
