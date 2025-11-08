@@ -7,6 +7,7 @@ import {
   Spinner,
   Row,
   Col,
+  Form,
 } from "react-bootstrap";
 import { apiFetch } from "../../utils/api";
 import { BORROW_SERVICE_URL } from "../../utils/api-constants";
@@ -22,6 +23,8 @@ interface RequestItem {
 const RequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [equipmentFilter, setEquipmentFilter] = useState<string>("");
+  const [requesterFilter, setRequesterFilter] = useState<string>("");
 
   const role = sessionStorage.getItem("role") || "";
 
@@ -81,8 +84,16 @@ const RequestsPage: React.FC = () => {
   };
 
   // Server already scopes borrows by authenticated user (students receive only their records)
-  // so we display the returned list as-is. This avoids relying on sessionStorage username.
-  const filteredRequests = requests;
+  // Apply local filters for equipment name and requester.
+  const filteredRequests = requests.filter((req) => {
+    const equipment = (req.equipmentName || "").toLowerCase();
+    const requester = (req.borrowerName || "").toLowerCase();
+
+    const eqMatch = equipmentFilter.trim() === "" || equipment.includes(equipmentFilter.toLowerCase());
+    const reqMatch = requesterFilter.trim() === "" || requester.includes(requesterFilter.toLowerCase());
+
+    return eqMatch && reqMatch;
+  });
 
   return (
     <Container fluid className="p-4">
@@ -97,7 +108,36 @@ const RequestsPage: React.FC = () => {
           <Spinner animation="border" variant="primary" />
         </div>
       ) : (
-        <Table striped bordered hover responsive>
+        <>
+          <Row className="mb-3">
+            <Col xs={12} md={4} className="mb-2 mb-md-0">
+              <Form.Label className="small text-muted">Filter by equipment</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Equipment name"
+                value={equipmentFilter}
+                onChange={(e) => setEquipmentFilter(e.target.value)}
+              />
+            </Col>
+
+            <Col xs={12} md={4} className="mb-2 mb-md-0">
+              <Form.Label className="small text-muted">Filter by requester</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Requester name"
+                value={requesterFilter}
+                onChange={(e) => setRequesterFilter(e.target.value)}
+              />
+            </Col>
+
+            <Col xs={12} md={4} className="d-flex align-items-end justify-content-end">
+              <Button variant="outline-secondary" onClick={() => { setEquipmentFilter(""); setRequesterFilter(""); }}>
+                Clear Filters
+              </Button>
+            </Col>
+          </Row>
+
+          <Table striped bordered hover responsive>
           <thead>
             <tr>
               <th>ID</th>
@@ -168,6 +208,7 @@ const RequestsPage: React.FC = () => {
                 ))}
           </tbody>
         </Table>
+        </>
       )}
     </Container>
   );
