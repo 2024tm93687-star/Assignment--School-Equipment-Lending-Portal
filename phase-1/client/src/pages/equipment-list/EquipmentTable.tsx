@@ -64,7 +64,7 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
             </Badge>
           </td>
           <td>
-            {userRole === "STUDENT" && (
+            { (userRole === "STUDENT" || userRole === "STAFF") && (
               <Button
                 size="sm"
                 variant="primary"
@@ -101,9 +101,6 @@ const EquipmentTable: React.FC<EquipmentTableProps> = ({
                   <FaTrash />
                 </Button>
               </>
-            )}
-            {userRole === "STAFF" && (
-              <span className="text-muted">View Only</span>
             )}
           </td>
         </tr>

@@ -17,6 +17,7 @@ interface NotificationItem {
   equipmentName?: string;
   borrowerName?: string;
   dueDate?: string;
+  status?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ brand }) => {
@@ -38,14 +39,15 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
       try {
         const data = (await apiFetch(`${BORROW_SERVICE_URL}/borrows`)) as any[];
 
-        // compute upcoming due items (example: all approved that have dueDate)
+        // Notifications: include ONLY overdue items
         const items = (data || [])
-          .filter((it) => it.dueDate && it.status === 'approved')
+          .filter((it) => it.dueDate && (it.status === 'overdue'))
           .map((it) => ({
             _id: it._id,
             equipmentName: it.equipmentName || it.equipmentId,
             borrowerName: it.borrowerName || "",
             dueDate: it.dueDate,
+            status: it.status,
           })) as NotificationItem[];
 
         setNotifications(items);
@@ -75,7 +77,7 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
                 {notifications.map((n) => (
                   <ListGroup.Item key={n._id} className="d-flex justify-content-between align-items-start">
                     <div>
-                      <div className="fw-bold">{n.equipmentName}</div>
+                      <div className="fw-bold">{n.equipmentName} {n.status === 'overdue' && <Badge bg="danger" className="ms-2">Overdue</Badge>}</div>
                       <div className="small text-muted">Due: {new Date(n.dueDate || '').toLocaleDateString()}</div>
                       {role !== 'STUDENT' && n.borrowerName && (
                         <div className="small text-muted">Borrower: {n.borrowerName}</div>

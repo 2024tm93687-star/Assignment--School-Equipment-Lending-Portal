@@ -24,7 +24,6 @@ const RequestsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const role = sessionStorage.getItem("role") || "";
-  const username = sessionStorage.getItem("username") || "";
 
   useEffect(() => {
     const load = async () => {
@@ -41,26 +40,43 @@ const RequestsPage: React.FC = () => {
   }, []);
 
   const handleApprove = (id: string) => {
-    setRequests((prev) =>
-      prev.map((req) => (req._id === id ? { ...req, status: "approved" } : req))
-    );
+    (async () => {
+      try {
+        await apiFetch(`${BORROW_SERVICE_URL}/borrow/${id}/approve`, { method: 'PUT', body: JSON.stringify({ status: 'approved' }) });
+        setRequests((prev) => prev.map((req) => (req._id === id ? { ...req, status: 'approved' } : req)));
+      } catch (err) {
+        console.error('Failed to approve request', err);
+      }
+    })();
   };
 
   const handleReject = (id: string) => {
-    setRequests((prev) =>
-      prev.map((req) => (req._id === id ? { ...req, status: "rejected" } : req))
-    );
+    (async () => {
+      try {
+        await apiFetch(`${BORROW_SERVICE_URL}/borrow/${id}/approve`, { method: 'PUT', body: JSON.stringify({ status: 'rejected' }) });
+        setRequests((prev) => prev.map((req) => (req._id === id ? { ...req, status: 'rejected' } : req)));
+      } catch (err) {
+        console.error('Failed to reject request', err);
+      }
+    })();
   };
 
   const handleMarkReturned = (id: string) => {
-    setRequests((prev) =>
-      prev.map((req) => (req._id === id ? { ...req, status: "returned" } : req))
-    );
+    // Call borrow-service to mark returned and then update UI on success
+    (async () => {
+      try {
+        await apiFetch(`${BORROW_SERVICE_URL}/borrow/${id}/return`, { method: 'PUT' });
+        setRequests((prev) => prev.map((req) => (req._id === id ? { ...req, status: 'returned' } : req)));
+      } catch (err) {
+        console.error('Failed to mark returned', err);
+        // Optionally show a UI error/notification here
+      }
+    })();
   };
 
-  const filteredRequests = requests.filter((req) =>
-    role === "STUDENT" ? req.borrowerName === username : true
-  );
+  // Server already scopes borrows by authenticated user (students receive only their records)
+  // so we display the returned list as-is. This avoids relying on sessionStorage username.
+  const filteredRequests = requests;
 
   return (
     <Container fluid className="p-4">
@@ -95,13 +111,15 @@ const RequestsPage: React.FC = () => {
                     <td>
                       <Badge
                         bg={
-                          req.status === "pending"
-                            ? "warning"
-                            : req.status === "approved"
-                            ? "success"
-                            : req.status === "rejected"
-                            ? "danger"
-                            : "secondary"
+                          (req.status || '').toLowerCase() === 'pending'
+                            ? 'warning'
+                            : (req.status || '').toLowerCase() === 'approved'
+                            ? 'success'
+                            : (req.status || '').toLowerCase() === 'rejected'
+                            ? 'danger'
+                            : (req.status || '').toLowerCase() === 'returned'
+                            ? 'info'
+                            : 'secondary'
                         }
                       >
                         {req.status}
@@ -129,9 +147,9 @@ const RequestsPage: React.FC = () => {
                             </Button>
                           </>
                         )}
-                        {req.status === "approved" && (
+                        {(req.status === "approved" || req.status === "overdue") && (
                           <Button
-                            variant="secondary"
+                            variant={req.status === "overdue" ? "warning" : "secondary"}
                             size="sm"
                             onClick={() => handleMarkReturned(req._id)}
                           >

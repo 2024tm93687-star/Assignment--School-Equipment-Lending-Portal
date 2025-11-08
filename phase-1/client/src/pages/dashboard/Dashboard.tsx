@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
       {/* Popular Available Equipment: show only for students and place near bottom */}
       {role && role.toLowerCase() === 'student' && (
         <Row className="mt-4">
-          <Col xs={12} md={6} lg={4}>
+          <Col xs={12}>
             <Card className="shadow-sm border-0">
               <Card.Header>Popular Available Equipment</Card.Header>
               <Card.Body>

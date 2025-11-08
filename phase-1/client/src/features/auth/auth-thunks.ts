@@ -24,9 +24,11 @@ export const loginThunk = createAsyncThunk<
     sessionStorage.setItem("token", res.token);
     sessionStorage.setItem("tokenType", res.tokenType);
 
-    const me = (await apiFetch(
-      `${AUTH_SERVICE_URL}/me`
-    )) as CurrentUserResponse;
+    const me = (await apiFetch(`${AUTH_SERVICE_URL}/me`)) as CurrentUserResponse;
+    // persist username/role for components that read sessionStorage
+    sessionStorage.setItem("role", me.role);
+    sessionStorage.setItem("username", me.username);
+    if (me.fullName) sessionStorage.setItem("fullName", me.fullName);
 
     return {
       username: me.username,
@@ -53,9 +55,11 @@ export const signupThunk = createAsyncThunk<
     sessionStorage.setItem("token", res.token);
     sessionStorage.setItem("tokenType", res.tokenType);
 
-    const me = (await apiFetch(
-      `${AUTH_SERVICE_URL}/me`
-    )) as CurrentUserResponse;
+    const me = (await apiFetch(`${AUTH_SERVICE_URL}/me`)) as CurrentUserResponse;
+    // persist username/role for components that read sessionStorage
+    sessionStorage.setItem("role", me.role);
+    sessionStorage.setItem("username", me.username);
+    if (me.fullName) sessionStorage.setItem("fullName", me.fullName);
 
     return {
       username: me.username,
@@ -81,6 +85,10 @@ export const fetchCurrentUserThunk = createAsyncThunk<
     const me = (await apiFetch(
       `${AUTH_SERVICE_URL}/me`
     )) as CurrentUserResponse;
+    // keep sessionStorage in sync
+    sessionStorage.setItem("role", me.role);
+    sessionStorage.setItem("username", me.username);
+    if (me.fullName) sessionStorage.setItem("fullName", me.fullName);
     return { username: me.username, role: me.role, fullName: me.fullName };
   } catch (err: any) {
     return rejectWithValue(err?.message || "Failed to fetch user");
