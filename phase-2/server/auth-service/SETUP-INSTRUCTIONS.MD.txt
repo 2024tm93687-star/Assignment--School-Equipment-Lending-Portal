@@ -1,0 +1,187 @@
+1. Install Java JDK
+📥 Step 1.1: Download JDK
+
+Select Java 11  (LTS versions)
+Choose your operating system:
+
+Windows: Download jdk-11_windows-x64_bin.exe
+
+
+📦 Step 1.2: Install JDK
+
+Run the installer (double-click the downloaded .exe file)
+Click Next on the welcome screen
+Choose installation directory (note this path - you'll need it!)
+
+Default: C:\Program Files\Java\jdk-11 (or similar)
+IMPORTANT: Copy this path!
+
+
+Click Next through the installation
+Click Close when installation completes
+
+📝 Step 1.3: Note Your JDK Installation Path
+Your JDK is installed at (example):
+C:\Program Files\Java\jdk-11
+Find your exact path:
+bashdir "C:\Program Files\Java"
+You should see a folder like jdk-11 
+
+2. Install Apache Maven
+📥 Step 2.1: Download Maven
+
+Visit: https://maven.apache.org/download.cgi
+Find Binary zip archive under "Files"
+Download: apache-maven-3.8.9-bin.zip (or latest version)
+
+📦 Step 2.2: Extract Maven
+
+Extract the ZIP file to a location WITHOUT SPACES in the path
+Recommended location: C:\Program Files\Apache\maven
+Right-click the ZIP file → Extract All
+Choose destination: C:\Program Files\Apache\
+Rename the extracted folder from apache-maven-3.8.9 to maven
+
+Final Maven Path should be:
+C:\Program Files\Apache\maven
+📝 Step 2.3: Verify Maven Structure
+Check that this folder exists:
+C:\Program Files\Apache\maven\bin\mvn.cmd
+
+3. Setup Environment Variables
+🔧 Step 3.1: Open Environment Variables
+Method 1: Using Search
+
+Press Windows Key
+Type: Environment Variables
+Click "Edit the system environment variables"
+Click "Environment Variables" button at bottom
+
+Method 2: Using Control Panel
+
+Right-click "This PC" or "My Computer"
+Select Properties
+Click "Advanced system settings"
+Click "Environment Variables" button
+
+🔧 Step 3.2: Create JAVA_HOME Variable
+
+In "System variables" section (bottom half), click "New"
+Variable name: JAVA_HOME
+Variable value: C:\Program Files\Java\jdk-11 (your JDK path)
+Click OK
+
+Example:
+Variable name:  JAVA_HOME
+Variable value: C:\Program Files\Java\jdk-11
+🔧 Step 3.3: Create MAVEN_HOME Variable
+
+Click "New" again in System variables
+Variable name: MAVEN_HOME
+Variable value: C:\Program Files\Apache\maven
+Click OK
+
+Example:
+Variable name:  MAVEN_HOME
+Variable value: C:\Program Files\Apache\maven
+🔧 Step 3.4: Update PATH Variable
+
+In "System variables", find and select "Path"
+Click "Edit"
+Click "New"
+Add: %JAVA_HOME%\bin
+Click "New" again
+Add: %MAVEN_HOME%\bin
+Click "OK" on all windows
+
+Your PATH should include:
+%JAVA_HOME%\bin
+%MAVEN_HOME%\bin
+🔧 Step 3.5: Visual Guide for Environment Variables
+System Variables:
+┌─────────────────────────────────────────┐
+│ Variable Name    │ Variable Value       │
+├─────────────────────────────────────────┤
+│ JAVA_HOME        │ C:\Program Files\... │
+│ MAVEN_HOME       │ C:\Program Files\... │
+│ Path             │ (multiple entries)   │
+│   - %JAVA_HOME%\bin                     │
+│   - %MAVEN_HOME%\bin                    │
+└─────────────────────────────────────────┘
+
+4. Verify Installation
+✅ Step 4.1: Open NEW Command Prompt
+IMPORTANT: Close any open Command Prompt/PowerShell windows and open a NEW one!
+Press Windows Key + R, type cmd, press Enter
+✅ Step 4.2: Verify Java
+java -version
+Expected Output:
+java version "11.0.x"
+Java(TM) SE Runtime Environment (build ...)
+✅ Step 4.3: Verify Maven
+mvn -version
+Expected Output:
+Apache Maven 3.8.9 (or similar)
+Maven home: C:\Program Files\Apache\maven
+Java version: 11.0.x
+✅ Step 4.4: Verify Environment Variables
+bashecho %JAVA_HOME%
+echo %MAVEN_HOME%
+Expected Output:
+C:\Program Files\Java\jdk-11
+C:\Program Files\Apache\maven
+
+# Clone the repository
+git clone https://github.com/2024tm93687-star/Assignment--School-Equipment-Lending-Portal.git
+
+# Navigate into the project
+cd Assignment--School-Equipment-Lending-Portal\phase-2\server\auth-service
+If Git is not installed:
+
+Download Git: https://git-scm.com/download/win
+Install with default settings
+Restart Command Prompt
+Run the clone command again
+
+Alternative (without Git):
+
+Go to: https://github.com/2024tm93687-star/Assignment--School-Equipment-Lending-Portal
+Click "Code" → "Download ZIP"
+Extract the ZIP file
+Navigate to phase-2\server\auth-service folder
+
+🔨 Step 5.2: Build the Project
+bash# Clean and build the project
+mvn clean install
+What this does:
+
+Downloads all required dependencies (first time takes longer)
+Compiles the Java code
+Runs tests
+Creates a JAR file in target/ folder
+
+Expected Output:
+[INFO] BUILD SUCCESS
+[INFO] Total time: 2-5 minutes (first time)
+
+▶️ Step 5.3: Run the Application
+Option A: Using Maven
+mvn spring-boot:run
+
+✅ Step 5.4: Verify Application Started
+You should see:
+============================================================
+   USER AUTHENTICATION SERVICE STARTED SUCCESSFULLY
+============================================================
+API Base URL: http://localhost:8080/api/auth
+H2 Console:   http://localhost:8080/h2-console
+Database URL: jdbc:h2:file:./data/authdb
+Username:     sa
+Password:     (empty)
+============================================================
+
+✅ Sample users created:
+   Admin:   username=admin,   password=admin123
+   Staff:   username=staff,   password=staff123
+   Student: username=student, password=student123
+The application is now running! Keep this window open.
