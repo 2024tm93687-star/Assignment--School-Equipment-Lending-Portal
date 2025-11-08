@@ -27,6 +27,17 @@ MONGODB_URI=mongodb://localhost:27017/equipment_management
 AUTH_SERVICE_URL=http://localhost:8080
 ```
 
+### 3. Borrow Service (.env in /server/borrow-service)
+
+Create a `.env` file in the `server/borrow-service` directory (optional — defaults are usable in docker):
+
+```bash
+# Borrow service environment variables
+PORT=3010
+MONGODB_URL=mongodb://localhost:27017/borrowdb
+AUTH_SERVICE_URL=http://localhost:8080
+```
+
 ### 3. Auth Service (application.properties in /server/auth-service/src/main/resources)
 
 The auth service configuration is already set in `application.properties`. Default values:
@@ -51,6 +62,7 @@ Services and ports:
 
 - Auth Service (Spring Boot): http://localhost:8080/api/auth
 - Equipment Service (Node.js): http://localhost:3000/api/equipment
+ - Borrow Service (Node.js): http://localhost:3010/api/v1
 - Client (Vite build served by Nginx): http://localhost:5173
 
 Useful commands:
@@ -64,9 +76,18 @@ Useful commands:
 Notes:
 
 - The client is configured to communicate with both auth and equipment services
+ - The client is configured to communicate with auth, equipment and borrow services.
+   Make sure the following environment variables are available to the client build (create a `.env` in `/client`):
+
+```bash
+VITE_AUTH_SERVICE_URL=http://localhost:8080/api/auth
+VITE_EQUIPMENT_SERVICE_URL=http://localhost:3000/api/equipment
+VITE_BORROW_SERVICE_URL=http://localhost:3010/api/v1
+```
 - Default user credentials:
   - Admin: username: `admin`, password: `admin123`
   - Staff: username: `staff`, password: `staff123`
   - Student: username: `student`, password: `student123`
 - Ensure ports 8080, 3000, and 5173 are free on your machine
+ - Ensure ports 8080, 3000, 3010 and 5173 are free on your machine
 - MongoDB data is persisted in a Docker volume
