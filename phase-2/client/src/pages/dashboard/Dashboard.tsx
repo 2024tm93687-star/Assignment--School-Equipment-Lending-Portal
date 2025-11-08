@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Container, Row, Col, Card, Table, Badge } from "react-bootstrap";
+import { Container, Row, Col, Card, Table, Badge, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../store";
 import { apiFetch } from "../../utils/api";
@@ -10,6 +11,7 @@ import type { Equipment } from "../../features/equipment/types";
 
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { fullName, role } = useSelector((state: RootState) => state.auth) as {
     fullName: string;
     role: string;
@@ -106,9 +108,16 @@ const Dashboard: React.FC = () => {
       {role && role.toLowerCase() !== "student" && (
         <Row className="g-4">
           <Col xs={12}>
-            <Card className="shadow-sm border-0">
-              <Card.Header>Recent Requests</Card.Header>
-              <Card.Body className="p-0">
+              <Card className="shadow-sm border-0">
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <div>Recent Requests</div>
+                  <div>
+                    <Button size="sm" variant="primary" onClick={() => navigate('/requests')}>
+                      Show All Requests
+                    </Button>
+                  </div>
+                </Card.Header>
+                <Card.Body className="p-0">
                 <Table striped bordered hover responsive className="mb-0">
                   <thead>
                     <tr>
@@ -150,8 +159,9 @@ const Dashboard: React.FC = () => {
                   </tbody>
                 </Table>
               </Card.Body>
-              <Card.Footer className="bg-transparent border-0 text-muted small">
-                Showing the five most recent pending requests.
+              <Card.Footer className="bg-transparent border-0 small">
+                <span className="text-primary me-2">*</span>
+                <span className="text-muted">Showing the five most recent pending requests.</span>
               </Card.Footer>
             </Card>
           </Col>
