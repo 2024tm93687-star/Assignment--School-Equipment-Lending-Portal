@@ -36,7 +36,7 @@ const Dashboard: React.FC = () => {
         const data = await apiFetch(`${BORROW_SERVICE_URL}/borrows`);
         setBorrows(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('Failed to load borrows', err);
+        console.error("Failed to load borrows", err);
         setBorrows([]);
       }
     };
@@ -45,13 +45,23 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const totalRequests = borrows.length;
-  const pendingRequests = borrows.filter((b) => (b.status || '').toLowerCase() === 'pending').length;
+  const pendingRequests = borrows.filter(
+    (b) => (b.status || "").toLowerCase() === "pending"
+  ).length;
 
   const cards = [
-    { title: "Total Equipment", value: equipmentItems.length, color: "primary" },
-    { title: "Available Equipment", value: equipmentItems.filter((e) => e.available > 0).length, color: "info" },
+    {
+      title: "Total Equipment",
+      value: equipmentItems.length,
+      color: "primary",
+    },
+    {
+      title: "Available Equipment",
+      value: equipmentItems.filter((e) => e.available > 0).length,
+      color: "info",
+    },
     { title: "Total Requests", value: totalRequests, color: "warning" },
-    { title: "Pending Requests", value: pendingRequests, color: "success" }
+    { title: "Pending Requests", value: pendingRequests, color: "success" },
   ];
 
   return (
@@ -72,7 +82,9 @@ const Dashboard: React.FC = () => {
             <Card className="shadow-sm border-0 h-100 text-center">
               <Card.Body className="d-flex flex-column justify-content-between align-items-center">
                 <Card.Title className="fw-semibold">{card.title}</Card.Title>
-                <Card.Text className={`fs-3 fw-bold text-${card.color} mb-0`}>{card.value}</Card.Text>
+                <Card.Text className={`fs-3 fw-bold text-${card.color} mb-0`}>
+                  {card.value}
+                </Card.Text>
               </Card.Body>
             </Card>
           </Col>
@@ -80,7 +92,7 @@ const Dashboard: React.FC = () => {
       </Row>
 
       {/* Recent Requests (staff/admin only) */}
-      {role && role.toLowerCase() !== 'student' && (
+      {role && role.toLowerCase() !== "student" && (
         <Row className="g-4">
           <Col xs={12}>
             <Card className="shadow-sm border-0">
@@ -96,24 +108,39 @@ const Dashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {borrows.slice().sort((a, b) => {
-                      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                      return tb - ta;
-                    }).slice(0, 10).map((req) => (
-                      <tr key={req._id || req.id}>
-                        <td>{req._id || req.id}</td>
-                        <td>{req.equipmentName || req.equipment}</td>
-                        <td>{req.borrowerName || req.requester || '—'}</td>
-                        <td>
-                          <Badge bg={
-                            (req.status || '').toLowerCase() === 'pending' ? 'warning' : (req.status || '').toLowerCase() === 'approved' ? 'success' : 'secondary'
-                          }>
-                            {req.status}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
+                    {borrows
+                      .slice()
+                      .sort((a, b) => {
+                        const ta = a.createdAt
+                          ? new Date(a.createdAt).getTime()
+                          : 0;
+                        const tb = b.createdAt
+                          ? new Date(b.createdAt).getTime()
+                          : 0;
+                        return tb - ta;
+                      })
+                      .slice(0, 10)
+                      .map((req) => (
+                        <tr key={req._id || req.id}>
+                          <td>{req._id || req.id}</td>
+                          <td>{req.equipmentName || req.equipment}</td>
+                          <td>{req.borrowerName || req.requester || "—"}</td>
+                          <td>
+                            <Badge
+                              bg={
+                                (req.status || "").toLowerCase() === "pending"
+                                  ? "warning"
+                                  : (req.status || "").toLowerCase() ===
+                                    "approved"
+                                  ? "success"
+                                  : "secondary"
+                              }
+                            >
+                              {req.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </Table>
               </Card.Body>
@@ -123,7 +150,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Popular Available Equipment: show only for students and place near bottom */}
-      {role && role.toLowerCase() === 'student' && (
+      {role && role.toLowerCase() === "student" && (
         <Row className="mt-4">
           <Col xs={12}>
             <Card className="shadow-sm border-0">
@@ -134,7 +161,9 @@ const Dashboard: React.FC = () => {
                 ) : (
                   <ul className="mb-0">
                     {availableList.map((e) => (
-                      <li key={e._id || e.name}>{e.name} ({e.available})</li>
+                      <li key={e._id || e.name}>
+                        {e.name} ({e.available})
+                      </li>
                     ))}
                   </ul>
                 )}

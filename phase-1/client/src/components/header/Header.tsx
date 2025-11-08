@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Navbar, Container, Dropdown, Button, Badge, ListGroup } from "react-bootstrap";
+import {
+  Navbar,
+  Container,
+  Dropdown,
+  Button,
+  Badge,
+  ListGroup,
+} from "react-bootstrap";
 import { FaUserCircle, FaBell } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/auth/auth-slice";
@@ -41,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
 
         // Notifications: include ONLY overdue items
         const items = (data || [])
-          .filter((it) => it.dueDate && (it.status === 'overdue'))
+          .filter((it) => it.dueDate && it.status === "overdue")
           .map((it) => ({
             _id: it._id,
             equipmentName: it.equipmentName || it.equipmentId,
@@ -52,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
 
         setNotifications(items);
       } catch (err) {
-        console.warn('Failed to load notifications', err);
+        console.warn("Failed to load notifications", err);
       }
     };
     loadNotifications();
@@ -61,11 +68,17 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm py-3">
       <Container fluid>
-        <Navbar.Brand className="fw-bold text-uppercase text-wrap">{brand}</Navbar.Brand>
+        <Navbar.Brand className="fw-bold text-uppercase text-wrap">
+          {brand}
+        </Navbar.Brand>
 
         <div className="d-flex align-items-center gap-3">
           <Dropdown align="end">
-            <Dropdown.Toggle as={Button} variant="secondary" className="d-flex align-items-center">
+            <Dropdown.Toggle
+              as={Button}
+              variant="secondary"
+              className="d-flex align-items-center"
+            >
               <FaBell className="me-2" />
               <Badge bg="danger">{notifications.length}</Badge>
             </Dropdown.Toggle>
@@ -75,12 +88,26 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
                   <ListGroup.Item>No upcoming due items</ListGroup.Item>
                 )}
                 {notifications.map((n) => (
-                  <ListGroup.Item key={n._id} className="d-flex justify-content-between align-items-start">
+                  <ListGroup.Item
+                    key={n._id}
+                    className="d-flex justify-content-between align-items-start"
+                  >
                     <div>
-                      <div className="fw-bold">{n.equipmentName} {n.status === 'overdue' && <Badge bg="danger" className="ms-2">Overdue</Badge>}</div>
-                      <div className="small text-muted">Due: {new Date(n.dueDate || '').toLocaleDateString()}</div>
-                      {role !== 'STUDENT' && n.borrowerName && (
-                        <div className="small text-muted">Borrower: {n.borrowerName}</div>
+                      <div className="fw-bold">
+                        {n.equipmentName}{" "}
+                        {n.status === "overdue" && (
+                          <Badge bg="danger" className="ms-2">
+                            Overdue
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="small text-muted">
+                        Due: {new Date(n.dueDate || "").toLocaleDateString()}
+                      </div>
+                      {role !== "STUDENT" && n.borrowerName && (
+                        <div className="small text-muted">
+                          Borrower: {n.borrowerName}
+                        </div>
                       )}
                     </div>
                   </ListGroup.Item>
@@ -90,7 +117,11 @@ const Header: React.FC<HeaderProps> = ({ brand }) => {
           </Dropdown>
 
           <Dropdown align="end">
-            <Dropdown.Toggle as={Button} variant="secondary" className="d-flex align-items-center">
+            <Dropdown.Toggle
+              as={Button}
+              variant="secondary"
+              className="d-flex align-items-center"
+            >
               <FaUserCircle className="me-2" size={20} />
               {username}
             </Dropdown.Toggle>
