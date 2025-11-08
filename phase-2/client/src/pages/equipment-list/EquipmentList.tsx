@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner, Button, Form } from "react-bootstrap";
+import { Container, Row, Col, Spinner, Button, Form, Modal } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import type { Equipment } from "../../features/equipment/types";
@@ -36,6 +36,12 @@ const EquipmentList: React.FC = () => {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
     null
   );
+  // Request modal state
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestingEquipmentId, setRequestingEquipmentId] = useState<string | null>(null);
+  const [requestingEquipmentName, setRequestingEquipmentName] = useState<string>("");
+  const [selectedDueDate, setSelectedDueDate] = useState<string>(""); // yyyy-mm-dd
+  const [requestError, setRequestError] = useState<string | null>(null);
 
   const userRole = useSelector((state: RootState) => state.auth.role);
   const {
@@ -93,26 +99,62 @@ const EquipmentList: React.FC = () => {
   const navigate = useNavigate();
 
   const handleRequest = async (id: string) => {
-    try {
-      const item = equipment.find((e) => e._id === id);
-      if (!item) return;
+    // Open request modal to choose due date
+    const item = equipment.find((e) => e._id === id);
+    if (!item) return;
+    setRequestError(null);
+    setRequestingEquipmentId(id);
+    setRequestingEquipmentName(item.name);
+    // default due date = 7 days from today
+    const now = new Date();
+    const defaultDue = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    setSelectedDueDate(defaultDue.toISOString().slice(0, 10));
+    setShowRequestModal(true);
+  };
 
-      // Call borrow-service to create a pending request
+  const submitRequest = async () => {
+    if (!requestingEquipmentId) return;
+    setRequestError(null);
+
+    const issue = new Date();
+    const due = selectedDueDate ? new Date(selectedDueDate) : null;
+
+    // Validation: due must be provided and <= 1 month from issue
+    if (!due) {
+      setRequestError("Please select a valid due date.");
+      return;
+    }
+
+    const maxDue = new Date(issue.getTime() + 30 * 24 * 60 * 60 * 1000);
+    if (due.getTime() < issue.getTime()) {
+      setRequestError("Due date cannot be before the issue date.");
+      return;
+    }
+    if (due.getTime() > maxDue.getTime()) {
+      setRequestError("Due date cannot be more than 1 month from the issue date.");
+      return;
+    }
+
+    try {
       await apiFetch(`${BORROW_SERVICE_URL}/borrow`, {
         method: 'POST',
         body: JSON.stringify({
-          equipmentId: id,
-          equipmentName: item.name,
-          // userId will be set by borrow-service from the auth validate result if not provided
+          equipmentId: requestingEquipmentId,
+          equipmentName: requestingEquipmentName,
+          issueDate: issue.toISOString(),
+          dueDate: due.toISOString(),
         }),
       });
 
+      setShowRequestModal(false);
+      setRequestingEquipmentId(null);
+      setRequestingEquipmentName("");
       // Navigate to requests page so the new pending request is visible
       navigate('/requests');
     } catch (err) {
       console.error('Failed to create borrow request', err);
       const msg = err instanceof Error ? err.message : 'Failed to send request. Please try again.';
-      alert(msg);
+      setRequestError(msg);
     }
   };
 
@@ -334,6 +376,39 @@ const EquipmentList: React.FC = () => {
           itemName={selectedEquipment.name}
         />
       )}
+
+      {/* Request Modal: choose due date */}
+      <Modal show={showRequestModal} onHide={() => setShowRequestModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Request: {requestingEquipmentName}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3" controlId="dueDate">
+              <Form.Label>Return (Due) Date</Form.Label>
+              <Form.Control
+                type="date"
+                value={selectedDueDate}
+                onChange={(e) => setSelectedDueDate(e.target.value)}
+                min={new Date().toISOString().slice(0, 10)}
+                max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+              />
+              <div className="small text-muted mt-2">
+                Default is 7 days from today. Maximum allowed is 1 month from issue date.
+              </div>
+              {requestError && <div className="text-danger small mt-2">{requestError}</div>}
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowRequestModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={() => submitRequest()}>
+            Confirm Request
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
